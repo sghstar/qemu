@@ -142,10 +142,10 @@ static void sifive_plic_update(SiFivePLICState *plic)
         int level = sifive_plic_irqs_pending(plic, addrid);
         switch (mode) {
         case PLICMode_M:
-            riscv_cpu_update_mip(RISCV_CPU(cpu), MIP_MEIP, BOOL_TO_MASK(level));
+            riscv_cpu_update_mip(RISCV_CPU(cpu), plic->m_mode_mip_mask, BOOL_TO_MASK(level));
             break;
         case PLICMode_S:
-            riscv_cpu_update_mip(RISCV_CPU(cpu), MIP_SEIP, BOOL_TO_MASK(level));
+            riscv_cpu_update_mip(RISCV_CPU(cpu), plic->s_mode_mip_mask, BOOL_TO_MASK(level));
             break;
         default:
             break;
@@ -362,6 +362,8 @@ static Property sifive_plic_properties[] = {
     DEFINE_PROP_UINT32("context-base", SiFivePLICState, context_base, 0),
     DEFINE_PROP_UINT32("context-stride", SiFivePLICState, context_stride, 0),
     DEFINE_PROP_UINT32("aperture-size", SiFivePLICState, aperture_size, 0),
+    DEFINE_PROP_UINT32("m-mode-mip-mask", SiFivePLICState, m_mode_mip_mask, MIP_MEIP),
+    DEFINE_PROP_UINT32("s-mode-mip-mask", SiFivePLICState, s_mode_mip_mask, MIP_SEIP),
     DEFINE_PROP_END_OF_LIST(),
 };
 

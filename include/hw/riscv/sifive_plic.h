@@ -67,6 +67,8 @@ typedef struct SiFivePLICState {
     uint32_t context_base;
     uint32_t context_stride;
     uint32_t aperture_size;
+    uint32_t m_mode_mip_mask;
+    uint32_t s_mode_mip_mask;
 } SiFivePLICState;
 
 void sifive_plic_raise_irq(SiFivePLICState *plic, uint32_t irq);
