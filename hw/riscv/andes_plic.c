@@ -99,6 +99,25 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
         error_report("%s: invalid register write: %08x", __func__, (uint32_t)addr);
     }
 
+    if (addr >= ss->pending_base &&
+        addr < ss->pending_base + (ss->num_sources >> 3)) {
+        uint32_t word = (addr - ss->pending_base) >> 2;
+        uint32_t xchg = ss->pending[word] ^ (uint32_t)value;
+        if (xchg) {
+            ss->pending[word] = value;
+            /* trigger sifive_plic_update */
+            uint32_t first = ffs(xchg) - 1;
+            uint32_t level = (value >> first) & 1;
+            uint32_t irq = (word << 5) + first;
+            if (level) {
+                sifive_plic_raise_irq(ss, irq);
+            } else {
+                sifive_plic_lower_irq(ss, irq);
+            }
+        }
+        return;
+    }
+
     switch (addr)
     {
     case REG_FEATURE_ENABLE:
