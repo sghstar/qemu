@@ -62,4 +62,13 @@ andes_plic_create(hwaddr addr, char *hart_config,
     uint32_t context_base, uint32_t context_stride,
     uint32_t aperture_size);
 
+DeviceState *
+andes_plic_swint_create(hwaddr addr, char *hart_config,
+    uint32_t num_sources, uint32_t num_priorities,
+    uint32_t priority_base, uint32_t pending_base,
+    uint32_t enable_base, uint32_t enable_stride,
+    uint32_t context_base, uint32_t context_stride,
+    uint32_t aperture_size, uint32_t m_mode_mip_mask,
+    uint32_t s_mode_mip_mask);
+
 #endif

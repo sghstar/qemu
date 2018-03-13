@@ -244,3 +244,36 @@ DeviceState *andes_plic_create(hwaddr addr, char *hart_config,
     sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, addr); /* n = 1 !! */
     return dev;
 }
+
+/*
+ * Create PLIC SWINT device.
+ */
+DeviceState *
+andes_plic_swint_create(hwaddr addr, char *hart_config, uint32_t num_sources,
+                        uint32_t num_priorities, uint32_t priority_base,
+                        uint32_t pending_base, uint32_t enable_base,
+                        uint32_t enable_stride, uint32_t context_base,
+                        uint32_t context_stride, uint32_t aperture_size,
+                        uint32_t m_mode_mip_mask, uint32_t s_mode_mip_mask)
+{
+    LOG("%s:\n", __func__);
+    DeviceState *dev = qdev_create(NULL, TYPE_ANDES_PLIC);
+    /* TODO: better inheritance, copy from sifive_plic_create() */
+    assert(enable_stride == (enable_stride & -enable_stride));
+    assert(context_stride == (context_stride & -context_stride));
+    qdev_prop_set_string(dev, "hart-config", hart_config);
+    qdev_prop_set_uint32(dev, "num-sources", num_sources);
+    qdev_prop_set_uint32(dev, "num-priorities", num_priorities);
+    qdev_prop_set_uint32(dev, "priority-base", priority_base);
+    qdev_prop_set_uint32(dev, "pending-base", pending_base);
+    qdev_prop_set_uint32(dev, "enable-base", enable_base);
+    qdev_prop_set_uint32(dev, "enable-stride", enable_stride);
+    qdev_prop_set_uint32(dev, "context-base", context_base);
+    qdev_prop_set_uint32(dev, "context-stride", context_stride);
+    qdev_prop_set_uint32(dev, "aperture-size", aperture_size);
+    qdev_prop_set_uint32(dev, "m-mode-mip-mask", m_mode_mip_mask);
+    qdev_prop_set_uint32(dev, "s-mode-mip-mask", s_mode_mip_mask);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, addr); /* n = 1 !! */
+    return dev;
+}
