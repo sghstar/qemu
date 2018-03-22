@@ -49,9 +49,17 @@ typedef struct AndesPLICClass {
 
     MemoryRegion parent_mmio;
 
+    /* registers */
     uint32_t *trigger_type;
-
+    uint32_t *preempted_priority;
     uint32_t feature_enable;
+
+    /* internal status */
+    uint32_t *preempted_id;
+    uint32_t priority_words;
+    uint32_t claim_count;
+    uint32_t last_claimed_id;
+    uint32_t last_claimed_priority;
 } AndesPLICState;
 
 DeviceState *

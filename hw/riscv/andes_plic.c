@@ -49,26 +49,57 @@ enum register_names {
     REG_VER_MAX_PRIORITY = 0x1104,
 };
 
+enum feature_enable_register {
+    FER_PREEMPT = (1u << 0),
+    VECTORED = (1u << 1),
+};
+
+static void
+push_preempt_context(AndesPLICState *s, uint32_t addrid, uint32_t priority)
+{
+    uint32_t word = s->priority_words * addrid;
+    set_bit(priority, (void *)&s->preempted_priority[word]);
+    ++s->claim_count;
+}
+
+static void
+pop_preempt_context(AndesPLICState *s, uint32_t addrid)
+{
+    SiFivePLICState *ss = SIFIVE_PLIC(s);
+    uint32_t word = s->priority_words * addrid;
+    s->last_claimed_priority = find_last_bit(
+        (void *)&s->preempted_priority[word], ss->num_priorities + 1);
+    clear_bit(s->last_claimed_priority, (void *)&s->preempted_priority[word]);
+    --s->claim_count;
+}
+
 static uint64_t
 andes_plic_read(void *opaque, hwaddr addr, unsigned size)
 {
     AndesPLICState *s = ANDES_PLIC(opaque);
     SiFivePLICState *ss = SIFIVE_PLIC(s);
     uint64_t value;
+    uint32_t word;
 
     if ((addr & 0x3)) {
         error_report("%s: invalid register write: %08x", __func__, (uint32_t)addr);
     }
 
+    /* pending RW */
+    if (addr >= ss->pending_base &&
+        addr < ss->pending_base + (ss->num_sources >> 3)) {
+        word = (addr - ss->pending_base) >> 2;
+        value = ss->pending[word];
+        return value;
+    }
+
     switch (addr)
     {
     case REG_FEATURE_ENABLE:
-        value = 0x3; /* PREEMPT|VECTORED */
+        value = s->feature_enable;
         break;
     case REG_NUM_IRQ_TARGET:
-        /* TODO: NO hardcode target number */
-        /* value = (ss->num_targets << 16) | ss->num_sources; */
-        value = (2 << 16) | ss->num_sources; /* MS */
+        value = (ss->num_addrs << 16) | ss->num_sources;
         break;
     case REG_VER_MAX_PRIORITY:
         value = (ss->num_priorities << 16) | 0x0007; /* PLIC ver 0.7 */
@@ -76,15 +107,34 @@ andes_plic_read(void *opaque, hwaddr addr, unsigned size)
     default:
         if (addr >= REG_TRIGGER_TYPE_BASE &&
             addr < REG_TRIGGER_TYPE_BASE + (ss->bitfield_words << 2)) {
-            value = s->trigger_type[addr >> 2];
+            word = (addr - REG_TRIGGER_TYPE_BASE) >> 2;
+            value = s->trigger_type[word];
             break;
         }
 
         memory_region_dispatch_read(&s->parent_mmio, addr, &value, size,
                                     MEMTXATTRS_UNSPECIFIED);
+
+        /* check if claimed successfully */
+        if (s->feature_enable & FER_PREEMPT && addr >= ss->context_base &&
+            addr < ss->context_base + ss->num_addrs * ss->context_stride) {
+            uint32_t addrid = (addr - ss->context_base) / ss->context_stride;
+            uint32_t contextid = (addr & (ss->context_stride - 1));
+            if ((contextid == 4) && value) {
+                /* an interrupt ID has claimed */
+                uint32_t curr_target_priority = ss->target_priority[addrid];
+                uint32_t next_target_priority = ss->source_priority[value];
+                push_preempt_context(s, addrid, curr_target_priority);
+                ss->target_priority[addrid] = next_target_priority;
+                /* hack! trigger sifive_plic_update */
+                sifive_plic_lower_irq(ss, 0);
+            }
+            /* TODO: read preempted priority statck registers */
+        }
     }
 
-    LOG("%s:  addr %08x, size %08x, value %08x\n", __func__, (int)addr, size, (int)value);
+    LOG("%s:  addr %08x, size %08x, value %08x\n", __func__, (int)addr, size,
+        (int)value);
     return value;
 }
 
@@ -93,27 +143,22 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
 {
     AndesPLICState *s = ANDES_PLIC(opaque);
     SiFivePLICState *ss = SIFIVE_PLIC(s);
+    uint32_t word, xchg;
     LOG("%s: addr %08x, size %08x, value %08x\n", __func__, (int)addr, size, (int)value);
 
     if ((addr & 0x3)) {
         error_report("%s: invalid register write: %08x", __func__, (uint32_t)addr);
     }
 
+    /* pending RW */
     if (addr >= ss->pending_base &&
         addr < ss->pending_base + (ss->num_sources >> 3)) {
-        uint32_t word = (addr - ss->pending_base) >> 2;
-        uint32_t xchg = ss->pending[word] ^ (uint32_t)value;
+        word = (addr - ss->pending_base) >> 2;
+        xchg = ss->pending[word] ^ (uint32_t)value;
         if (xchg) {
             ss->pending[word] = value;
-            /* trigger sifive_plic_update */
-            uint32_t first = ffs(xchg) - 1;
-            uint32_t level = (value >> first) & 1;
-            uint32_t irq = (word << 5) + first;
-            if (level) {
-                sifive_plic_raise_irq(ss, irq);
-            } else {
-                sifive_plic_lower_irq(ss, irq);
-            }
+            /* hack! trigger sifive_plic_update */
+            sifive_plic_lower_irq(ss, 0);
         }
         return;
     }
@@ -122,7 +167,10 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
     {
     case REG_FEATURE_ENABLE:
         s->feature_enable = value & 0x3;
-        /* TODO: side effects */
+        /* TODO: side effects
+         *   PREEMPT: NOP, take effects from next claim/complete.
+         *   VECTORED: ?
+         */
         break;
     case REG_NUM_IRQ_TARGET:   /* RO */
     case REG_VER_MAX_PRIORITY: /* RO */
@@ -131,12 +179,29 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
         /* R/W1S */
         if (addr >= REG_TRIGGER_TYPE_BASE &&
             addr < REG_TRIGGER_TYPE_BASE + (ss->bitfield_words << 2)) {
-            s->trigger_type[addr >> 2] |= value;
+            word = (addr - REG_TRIGGER_TYPE_BASE) >> 2;
+            s->trigger_type[word] |= value;
             break;
         }
 
         memory_region_dispatch_write(&s->parent_mmio, addr, value, size,
                                      MEMTXATTRS_UNSPECIFIED);
+
+        /* check if complete */
+        if (s->feature_enable & FER_PREEMPT && addr >= ss->context_base &&
+            addr < ss->context_base + ss->num_addrs * ss->context_stride) {
+            uint32_t addrid = (addr - ss->context_base) / ss->context_stride;
+            uint32_t contextid = (addr & (ss->context_stride - 1));
+            if ((contextid == 4) && value) {
+                /* an interrupt ID has completed */
+                pop_preempt_context(s, addrid);
+                uint32_t next_target_priority = s->last_claimed_priority;
+                ss->target_priority[addrid] = next_target_priority;
+                /* hack! trigger sifive_plic_update */
+                sifive_plic_lower_irq(ss, 0);
+            }
+            /* TODO: write preempted priority statck registers */
+        }
     }
 }
 
@@ -159,11 +224,19 @@ andes_plic_reset(DeviceState * dev)
     SiFivePLICState *ss = SIFIVE_PLIC(s);
 
     memset(ss->target_priority, 0, sizeof(uint32_t) * ss->num_addrs);
+    memset(s->trigger_type, 0, sizeof(uint32_t) * ss->bitfield_words);
+    memset(s->preempted_priority, 0,
+           sizeof(uint32_t) * s->priority_words * ss->num_addrs);
+    memset(s->preempted_id, 0,
+           sizeof(uint32_t) * ss->bitfield_words * ss->num_addrs);
 
     if (k->parent_reset)
         k->parent_reset(dev);
 
     s->feature_enable = 0;
+    s->claim_count = 0;
+    s->last_claimed_id = 0;
+    s->last_claimed_priority = 0;
 }
 
 static void
@@ -181,7 +254,10 @@ andes_plic_realize(DeviceState *dev, Error **errp)
         return;
     }
 
-    s->trigger_type = g_new0(uint32_t, ss->bitfield_words);
+    s->priority_words = (ss->num_priorities + 31) >> 5;
+    s->trigger_type = g_new(uint32_t, ss->bitfield_words);
+    s->preempted_priority = g_new(uint32_t, s->priority_words * ss->num_addrs);
+    s->preempted_id = g_new(uint32_t, ss->bitfield_words * ss->num_addrs);
 
     /* override MemoryRegionOps */
     s->parent_mmio = ss->mmio;
