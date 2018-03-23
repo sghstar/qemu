@@ -159,13 +159,20 @@ static void sifive_plic_update(SiFivePLICState *plic)
 
 void sifive_plic_raise_irq(SiFivePLICState *plic, uint32_t irq)
 {
-    sifive_plic_set_pending(plic, irq, true);
-    sifive_plic_update(plic);
+    if (irq) {
+        sifive_plic_set_pending(plic, irq, true);
+        sifive_plic_update(plic);
+    }
 }
 
 void sifive_plic_lower_irq(SiFivePLICState *plic, uint32_t irq)
 {
-    sifive_plic_set_pending(plic, irq, false);
+    /* The gateway does not have the facility to retract an interrupt request
+     * once forwarded to the PLIC core. */
+    if (0) {
+        sifive_plic_set_pending(plic, irq, false);
+    }
+    /* hack */
     sifive_plic_update(plic);
 }
 
@@ -196,6 +203,7 @@ static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
     if (id) {
         sifive_plic_set_pending(plic, id, false);
         sifive_plic_set_claimed(plic, id, true);
+        sifive_plic_update(plic);
     }
     return id;
 }
@@ -286,7 +294,7 @@ static void sifive_plic_write(void *opaque, hwaddr addr, uint64_t value,
         addr < plic->priority_base + (plic->num_sources << 2))
     {
         uint32_t irq = (addr - plic->priority_base) >> 2;
-        plic->source_priority[irq] = value & 7;
+        plic->source_priority[irq] = value % (plic->num_priorities + 1);
         if (RISCV_DEBUG_PLIC) {
             qemu_log("plic: write priority: irq=%d priority=%d\n",
                 irq, plic->source_priority[irq]);
@@ -433,8 +441,12 @@ static void sifive_plic_irq_request(void *opaque, int irq, int level)
     if (RISCV_DEBUG_PLIC) {
         qemu_log("sifive_plic_irq_request: irq=%d level=%d\n", irq, level);
     }
-    sifive_plic_set_pending(plic, irq, level > 0);
-    sifive_plic_update(plic);
+    /* The gateway does not have the facility to retract an interrupt request
+     * once forwarded to the PLIC core. */
+    if (level) {
+        sifive_plic_set_pending(plic, irq, level > 0);
+        sifive_plic_update(plic);
+    }
 }
 
 static void sifive_plic_realize(DeviceState *dev, Error **errp)
