@@ -171,6 +171,7 @@ void sifive_plic_lower_irq(SiFivePLICState *plic, uint32_t irq)
 
 static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
 {
+    uint32_t id = 0, highest_priority = 0;
     int i, j;
     for (i = 0; i < plic->bitfield_words; i++) {
         uint32_t pending_enabled_not_claimed =
@@ -182,15 +183,21 @@ static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
         for (j = 0; j < 32; j++) {
             int irq = (i << 5) + j;
             uint32_t prio = plic->source_priority[irq];
+            if (prio <= highest_priority) {
+                continue;
+            }
             int enabled = pending_enabled_not_claimed & (1 << j);
             if (enabled && prio > plic->target_priority[addrid]) {
-                sifive_plic_set_pending(plic, irq, false);
-                sifive_plic_set_claimed(plic, irq, true);
-                return irq;
+                id = irq;
+                highest_priority = prio;
             }
         }
     }
-    return 0;
+    if (id) {
+        sifive_plic_set_pending(plic, id, false);
+        sifive_plic_set_claimed(plic, id, true);
+    }
+    return id;
 }
 
 static uint64_t sifive_plic_read(void *opaque, hwaddr addr, unsigned size)
