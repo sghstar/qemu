@@ -51,8 +51,50 @@ enum register_names {
 
 enum feature_enable_register {
     FER_PREEMPT = (1u << 0),
-    VECTORED = (1u << 1),
+    FER_VECTORED = (1u << 1),
 };
+
+static int
+update_eip_vectored(void *plic)
+{
+    AndesPLICState *s = ANDES_PLIC(plic);
+    SiFivePLICState *ss = SIFIVE_PLIC(s);
+    int addrid;
+
+    /* arbitrate IRQs:
+     *   algorithm: lowest addrid first
+     */
+    for (addrid = 0; addrid < ss->num_addrs; addrid++) {
+        uint32_t hartid = ss->addr_config[addrid].hartid;
+        PLICMode mode = ss->addr_config[addrid].mode;
+        CPUState *cpu = qemu_get_cpu(hartid);
+        CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
+        if (!env) {
+            continue;
+        }
+        CPUAndesState *ext = env->extension_data;
+        if (ext->vectored_irq) {
+            continue;
+        }
+        uint32_t irq_id = sifive_plic_claim(ss, addrid);
+        ext->vectored_irq = irq_id;
+        int level = irq_id > 0;
+        switch (mode) {
+        case PLICMode_M:
+            riscv_set_local_interrupt(RISCV_CPU(cpu), ss->m_mode_mip_mask,
+                                      level);
+            break;
+        case PLICMode_S:
+            riscv_set_local_interrupt(RISCV_CPU(cpu), ss->s_mode_mip_mask,
+                                      level);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return 0;
+}
 
 static void
 push_preempt_context(AndesPLICState *s, uint32_t addrid, uint32_t priority)
@@ -169,8 +211,11 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
         s->feature_enable = value & 0x3;
         /* TODO: side effects
          *   PREEMPT: NOP, take effects from next claim/complete.
-         *   VECTORED: ?
+         *   VECTORED: change update_eip logic.
          */
+        ss->update_eip = (s->feature_enable & FER_VECTORED)
+                             ? update_eip_vectored
+                             : s->parent_update_eip;
         break;
     case REG_NUM_IRQ_TARGET:   /* RO */
     case REG_VER_MAX_PRIORITY: /* RO */
@@ -188,12 +233,25 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
                                      MEMTXATTRS_UNSPECIFIED);
 
         /* check if complete */
-        if (s->feature_enable & FER_PREEMPT && addr >= ss->context_base &&
+        if (s->feature_enable & (FER_PREEMPT | FER_VECTORED) &&
+            addr >= ss->context_base &&
             addr < ss->context_base + ss->num_addrs * ss->context_stride) {
             uint32_t addrid = (addr - ss->context_base) / ss->context_stride;
             uint32_t contextid = (addr & (ss->context_stride - 1));
             if ((contextid == 4) && value) {
                 /* an interrupt ID has completed */
+                /* handle vectored */
+                uint32_t hartid = ss->addr_config[addrid].hartid;
+                CPUState *cpu = qemu_get_cpu(hartid);
+                CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
+                if (env) {
+                    CPUAndesState *ext = env->extension_data;
+                    if (ext->vectored_irq) {
+                        assert(ext->vectored_irq == value);
+                        ext->vectored_irq = 0;
+                    }
+                }
+                /* handle preemption */
                 pop_preempt_context(s, addrid);
                 uint32_t next_target_priority = s->last_claimed_priority;
                 ss->target_priority[addrid] = next_target_priority;
@@ -263,6 +321,9 @@ andes_plic_realize(DeviceState *dev, Error **errp)
     s->parent_mmio = ss->mmio;
     memory_region_init_io(&ss->mmio, OBJECT(dev), &andes_plic_ops, s,
                           TYPE_ANDES_PLIC, ss->aperture_size);
+
+    /* interface */
+    s->parent_update_eip = ss->update_eip;
 }
 
 #if 0

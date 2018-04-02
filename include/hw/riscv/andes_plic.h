@@ -60,6 +60,9 @@ typedef struct AndesPLICClass {
     uint32_t claim_count;
     uint32_t last_claimed_id;
     uint32_t last_claimed_priority;
+
+    /* interface */
+    int (*parent_update_eip)(void *plic);
 } AndesPLICState;
 
 DeviceState *
