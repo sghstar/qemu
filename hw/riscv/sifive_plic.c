@@ -157,11 +157,18 @@ static void sifive_plic_update(SiFivePLICState *plic)
     }
 }
 
+static int update_eip_wrapper(void *plic)
+{
+    SiFivePLICState *p = plic;
+    sifive_plic_update(p);
+    return 0;
+}
+
 void sifive_plic_raise_irq(SiFivePLICState *plic, uint32_t irq)
 {
     if (irq) {
         sifive_plic_set_pending(plic, irq, true);
-        sifive_plic_update(plic);
+        plic->update_eip(plic);
     }
 }
 
@@ -173,7 +180,7 @@ void sifive_plic_lower_irq(SiFivePLICState *plic, uint32_t irq)
         sifive_plic_set_pending(plic, irq, false);
     }
     /* hack */
-    sifive_plic_update(plic);
+    plic->update_eip(plic);
 }
 
 static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
@@ -203,7 +210,7 @@ static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
     if (id) {
         sifive_plic_set_pending(plic, id, false);
         sifive_plic_set_claimed(plic, id, true);
-        sifive_plic_update(plic);
+        plic->update_eip(plic);
     }
     return id;
 }
@@ -334,7 +341,7 @@ static void sifive_plic_write(void *opaque, hwaddr addr, uint64_t value,
             }
             if (value <= plic->num_priorities) {
                 plic->target_priority[addrid] = value;
-                sifive_plic_update(plic);
+                plic->update_eip(plic);
             }
             return;
         } else if (contextid == 4) {
@@ -346,7 +353,7 @@ static void sifive_plic_write(void *opaque, hwaddr addr, uint64_t value,
             }
             if (value < plic->num_sources) {
                 sifive_plic_set_claimed(plic, value, false);
-                sifive_plic_update(plic);
+                plic->update_eip(plic);
             }
             return;
         }
@@ -445,7 +452,7 @@ static void sifive_plic_irq_request(void *opaque, int irq, int level)
      * once forwarded to the PLIC core. */
     if (level) {
         sifive_plic_set_pending(plic, irq, level > 0);
-        sifive_plic_update(plic);
+        plic->update_eip(plic);
     }
 }
 
@@ -464,6 +471,9 @@ static void sifive_plic_realize(DeviceState *dev, Error **errp)
     plic->enable = g_new0(uint32_t, plic->bitfield_words * plic->num_addrs);
     sysbus_init_mmio(SYS_BUS_DEVICE(dev), &plic->mmio);
     qdev_init_gpio_in(dev, sifive_plic_irq_request, plic->num_sources);
+
+    /* interface */
+    plic->update_eip = update_eip_wrapper;
 }
 
 static void sifive_plic_class_init(ObjectClass *klass, void *data)
