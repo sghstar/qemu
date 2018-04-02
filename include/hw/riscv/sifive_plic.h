@@ -76,6 +76,7 @@ typedef struct SiFivePLICState {
 
 void sifive_plic_raise_irq(SiFivePLICState *plic, uint32_t irq);
 void sifive_plic_lower_irq(SiFivePLICState *plic, uint32_t irq);
+int sifive_plic_num_irqs_pending(SiFivePLICState *plic, uint32_t addrid);
 
 DeviceState *sifive_plic_create(hwaddr addr, char *hart_config,
     uint32_t num_sources, uint32_t num_priorities,
