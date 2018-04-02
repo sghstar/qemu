@@ -61,8 +61,9 @@ bool riscv_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
         CPURISCVState *env = &cpu->env;
         int interruptno = riscv_cpu_local_irq_pending(env);
         if (interruptno >= 0) {
+            CPUClass *cc = CPU_GET_CLASS(cs);
             cs->exception_index = RISCV_EXCP_INT_FLAG | interruptno;
-            riscv_cpu_do_interrupt(cs);
+            cc->do_interrupt(cs);
             return true;
         }
     }
