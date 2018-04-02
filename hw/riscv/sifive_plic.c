@@ -183,7 +183,7 @@ void sifive_plic_lower_irq(SiFivePLICState *plic, uint32_t irq)
     plic->update_eip(plic);
 }
 
-static uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
+uint32_t sifive_plic_claim(SiFivePLICState *plic, uint32_t addrid)
 {
     uint32_t id = 0, highest_priority = 0;
     int i, j;
