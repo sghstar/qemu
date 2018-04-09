@@ -54,6 +54,9 @@ enum feature_enable_register {
     FER_VECTORED = (1u << 1),
 };
 
+static uint64_t
+andes_plic_read(void *opaque, hwaddr addr, unsigned size);
+
 static int
 update_eip_vectored(void *plic)
 {
@@ -73,18 +76,36 @@ update_eip_vectored(void *plic)
             continue;
         }
         CPUAndesState *ext = env->extension_data;
-        if (ext->vectored_irq) {
-            continue;
-        }
-        uint32_t irq_id = sifive_plic_claim(ss, addrid);
-        ext->vectored_irq = irq_id;
-        int level = irq_id > 0;
+        int level = 0;
+        int irq_id = 0;
         switch (mode) {
         case PLICMode_M:
+            if (!ext->vectored_irq_m) {
+                level = sifive_plic_num_irqs_pending(plic, addrid) > 0;
+                if (level) {
+                    /* claim here */
+                    hwaddr addr = ss->context_base + ss->context_stride * addrid + 4;
+                    irq_id = andes_plic_read(plic, addr, 4);
+                    ext->vectored_irq_m = irq_id;
+                    assert(irq_id);
+                }
+            }
+            LOG("%s: M level %d, irq_id %d\n", __func__, level, irq_id);
             riscv_set_local_interrupt(RISCV_CPU(cpu), ss->m_mode_mip_mask,
                                       level);
             break;
         case PLICMode_S:
+            if (!ext->vectored_irq_s) {
+                level = sifive_plic_num_irqs_pending(plic, addrid) > 0;
+                if (level) {
+                    /* claim here */
+                    hwaddr addr = ss->context_base + ss->context_stride * addrid + 4;
+                    irq_id = andes_plic_read(plic, addr, 4);
+                    ext->vectored_irq_m = irq_id;
+                    assert(irq_id);
+                }
+            }
+            LOG("%s: S level %d, irq_id %d\n", __func__, level, irq_id);
             riscv_set_local_interrupt(RISCV_CPU(cpu), ss->s_mode_mip_mask,
                                       level);
             break;
@@ -246,9 +267,23 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
                 CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
                 if (env) {
                     CPUAndesState *ext = env->extension_data;
-                    if (ext->vectored_irq) {
-                        assert(ext->vectored_irq == value);
-                        ext->vectored_irq = 0;
+                    switch (env->priv) {
+                    case PRV_M:
+                        if (ext->vectored_irq_m) {
+                            assert(ext->vectored_irq_m == value);
+                            ext->vectored_irq_m = 0;
+                        }
+                        LOG("%s: M complete %d, vid %d\n", __func__, (int)value, ext->vectored_irq_m);
+                        break;
+                    case PRV_S:
+                        if (ext->vectored_irq_s) {
+                            assert(ext->vectored_irq_s == value);
+                            ext->vectored_irq_s = 0;
+                        }
+                        LOG("%s: S complete %d, vid %d\n", __func__, (int)value, ext->vectored_irq_s);
+                        break;
+                    default:
+                        g_assert_not_reached();
                     }
                 }
                 /* handle preemption */
