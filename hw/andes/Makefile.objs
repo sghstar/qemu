@@ -1,3 +1,4 @@
 obj-$(CONFIG_ATCUART100) += atcuart100.o
 obj-$(CONFIG_ATCPIT100) += atcpit100.o
 obj-$(CONFIG_ATFSDC010) += atfsdc010.o
+obj-$(CONFIG_ATFMAC100) += atfmac100.o
