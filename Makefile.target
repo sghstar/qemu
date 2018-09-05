@@ -154,6 +154,10 @@ else
 obj-y += hw/$(TARGET_BASE_ARCH)/
 endif
 
+ifeq ($(TARGET_BASE_ARCH), riscv)
+obj-y += hw/andes/
+endif
+
 GENERATED_FILES += hmp-commands.h hmp-commands-info.h
 
 endif # CONFIG_SOFTMMU

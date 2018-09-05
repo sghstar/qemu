@@ -9,4 +9,6 @@ obj-y += sifive_u.o
 obj-y += sifive_uart.o
 obj-y += spike.o
 obj-y += virt.o
+obj-y += andes_plmt.o
+obj-y += andes_plic.o
 obj-y += andes_ae250.o
