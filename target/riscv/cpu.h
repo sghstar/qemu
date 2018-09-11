@@ -171,6 +171,9 @@ struct CPURISCVState {
     pmp_table_t pmp_state;
 #endif
 
+    /* extended CPU data */
+    void *ext;
+
     float_status fp_status;
 
     /* QEMU */
