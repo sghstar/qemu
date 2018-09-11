@@ -94,6 +94,17 @@ void csr_write_helper(CPURISCVState *env, target_ulong val_to_write,
     uint64_t all_ints = delegable_ints | MIP_MSIP | MIP_MTIP;
 #endif
 
+    /* CSR extension interface hook
+     * TODO: use CSR I/F instead
+     */
+    if (env->csrif.csr_write_helper != riscv_csr_write_helper) {
+        int next = 0;
+        env->csrif.csr_write_helper(env, val_to_write, csrno, &next);
+        if (!next) {
+            return;
+        }
+    }
+
     switch (csrno) {
     case CSR_FFLAGS:
         validate_mstatus_fs(env, GETPC());
@@ -414,6 +425,17 @@ target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno)
         return 0;
     }
 
+    /* CSR extension interface hook
+     * TODO: use CSR I/F instead
+     */
+    if (env->csrif.csr_read_helper != riscv_csr_read_helper) {
+        int next = 0;
+        target_ulong csr = env->csrif.csr_read_helper(env, csrno, &next);
+        if (!next) {
+            return csr;
+        }
+    }
+
     switch (csrno) {
     case CSR_FFLAGS:
         validate_mstatus_fs(env, GETPC());
@@ -721,3 +743,25 @@ void helper_tlb_flush(CPURISCVState *env)
 }
 
 #endif /* !CONFIG_USER_ONLY */
+
+target_ulong riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next)
+{
+    if (next) {
+        *next = 0; /* done */
+    }
+    return csr_read_helper(env, csrno);
+}
+
+void riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target_ulong csrno, int *next)
+{
+    if (next) {
+        *next = 0; /* done */
+    }
+    csr_write_helper(env, value, csrno);
+}
+
+void riscv_csrif_init(CPURISCVState *env)
+{
+    env->csrif.csr_read_helper = riscv_csr_read_helper;
+    env->csrif.csr_write_helper = riscv_csr_write_helper;
+}

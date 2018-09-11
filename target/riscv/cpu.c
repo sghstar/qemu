@@ -317,6 +317,7 @@ static void riscv_cpu_init(Object *obj)
     RISCVCPU *cpu = RISCV_CPU(obj);
 
     cs->env_ptr = &cpu->env;
+    riscv_csrif_init(&cpu->env);
 }
 
 static const VMStateDescription vmstate_riscv_cpu = {

@@ -102,6 +102,7 @@ enum {
 typedef struct CPURISCVState CPURISCVState;
 
 #include "pmp.h"
+#include "cpu_csr_ext_if.h"
 
 struct CPURISCVState {
     target_ulong gpr[32];
@@ -173,6 +174,8 @@ struct CPURISCVState {
 
     /* extended CPU data */
     void *ext;
+
+    CPURVCsrExtIf csrif;
 
     float_status fp_status;
 
@@ -277,6 +280,8 @@ void QEMU_NORETURN do_raise_exception_err(CPURISCVState *env,
 target_ulong cpu_riscv_get_fflags(CPURISCVState *env);
 void cpu_riscv_set_fflags(CPURISCVState *env, target_ulong);
 
+void riscv_csrif_init(CPURISCVState *env);
+
 #define TB_FLAGS_MMU_MASK  3
 #define TB_FLAGS_FP_ENABLE MSTATUS_FS
 
@@ -295,6 +300,9 @@ static inline void cpu_get_tb_cpu_state(CPURISCVState *env, target_ulong *pc,
 void csr_write_helper(CPURISCVState *env, target_ulong val_to_write,
         target_ulong csrno);
 target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno);
+
+void riscv_csr_write_helper(CPURISCVState *env, target_ulong val_to_write, target_ulong csrno, int *next);
+target_ulong riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next);
 
 #include "exec/cpu-all.h"
 
