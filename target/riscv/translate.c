@@ -1659,7 +1659,7 @@ static void decode_RV32_64C2(CPURISCVState *env, DisasContext *ctx)
     }
 }
 
-static void decode_RV32_64C(CPURISCVState *env, DisasContext *ctx)
+static int decode_RV32_64C(CPURISCVState *env, DisasContext *ctx)
 {
     uint8_t op = extract32(ctx->opcode, 0, 2);
 
@@ -1674,9 +1674,10 @@ static void decode_RV32_64C(CPURISCVState *env, DisasContext *ctx)
         decode_RV32_64C2(env, ctx);
         break;
     }
+    return 0; /* done */
 }
 
-static void decode_RV32_64G(CPURISCVState *env, DisasContext *ctx)
+static int decode_RV32_64G(CPURISCVState *env, DisasContext *ctx)
 {
     int rs1;
     int rs2;
@@ -1795,6 +1796,7 @@ static void decode_RV32_64G(CPURISCVState *env, DisasContext *ctx)
         gen_exception_illegal(ctx);
         break;
     }
+    return 0; /* done */
 }
 
 static void decode_opc(CPURISCVState *env, DisasContext *ctx)
@@ -1805,11 +1807,11 @@ static void decode_opc(CPURISCVState *env, DisasContext *ctx)
             gen_exception_illegal(ctx);
         } else {
             ctx->pc_succ_insn = ctx->base.pc_next + 2;
-            decode_RV32_64C(env, ctx);
+            env->isaif.decode_RV32_64C(env, ctx);
         }
     } else {
         ctx->pc_succ_insn = ctx->base.pc_next + 4;
-        decode_RV32_64G(env, ctx);
+        env->isaif.decode_RV32_64G(env, ctx);
     }
 }
 
@@ -1932,4 +1934,10 @@ void riscv_translate_init(void)
                              "load_res");
     load_val = tcg_global_mem_new(cpu_env, offsetof(CPURISCVState, load_val),
                              "load_val");
+}
+
+void riscv_isaif_init(CPURISCVState *env)
+{
+    env->isaif.decode_RV32_64C = decode_RV32_64C;
+    env->isaif.decode_RV32_64G = decode_RV32_64G;
 }

@@ -103,6 +103,7 @@ typedef struct CPURISCVState CPURISCVState;
 
 #include "pmp.h"
 #include "cpu_csr_ext_if.h"
+#include "cpu_isa_ext_if.h"
 
 struct CPURISCVState {
     target_ulong gpr[32];
@@ -176,6 +177,7 @@ struct CPURISCVState {
     void *ext;
 
     CPURVCsrExtIf csrif;
+    CPURVIsaExtIf isaif;
 
     float_status fp_status;
 
@@ -281,6 +283,7 @@ target_ulong cpu_riscv_get_fflags(CPURISCVState *env);
 void cpu_riscv_set_fflags(CPURISCVState *env, target_ulong);
 
 void riscv_csrif_init(CPURISCVState *env);
+void riscv_isaif_init(CPURISCVState *env);
 
 #define TB_FLAGS_MMU_MASK  3
 #define TB_FLAGS_FP_ENABLE MSTATUS_FS
