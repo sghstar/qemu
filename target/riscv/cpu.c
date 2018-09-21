@@ -191,6 +191,24 @@ static void rv64imacu_nommu_cpu_init(Object *obj)
     set_resetvec(env, DEFAULT_RSTVEC);
 }
 
+static void rv64gcsux_andes_priv1_10_0_cpu_init(Object *obj)
+{
+    CPURISCVState *env = &RISCV_CPU(obj)->env;
+    set_misa(env, RV64 | RVI | RVM | RVA | RVF | RVD | RVC | RVS | RVU | RVX);
+    set_versions(env, USER_VERSION_2_02_0, PRIV_VERSION_1_10_0);
+    set_resetvec(env, ANDES_NX25_DEFAULT_RSTVEC);
+
+    CPURVAndesExt *ext = g_new0(CPURVAndesExt, 1);
+    env->ext = ext;
+#ifndef CONFIG_USER_ONLY
+    env->mstatus = (0x3 << 11); /* MPP=M */
+#endif
+    ext->mmsc_cfg = 0x00003008u; /* EV5PE, VPLIC, ECD */
+
+    andes_riscv_csrif_init(env);
+    andes_riscv_isaif_init(env);
+}
+
 #endif
 
 static ObjectClass *riscv_cpu_class_by_name(const char *cpu_model)
@@ -465,7 +483,8 @@ static const TypeInfo riscv_cpu_type_infos[] = {
     DEFINE_CPU(TYPE_RISCV_CPU_RV64GCSU_V1_10_0, rv64gcsu_priv1_10_0_cpu_init),
     DEFINE_CPU(TYPE_RISCV_CPU_RV64IMACU_NOMMU,  rv64imacu_nommu_cpu_init),
     DEFINE_CPU(TYPE_RISCV_CPU_SIFIVE_E51,       rv64imacu_nommu_cpu_init),
-    DEFINE_CPU(TYPE_RISCV_CPU_SIFIVE_U54,       rv64gcsu_priv1_10_0_cpu_init)
+    DEFINE_CPU(TYPE_RISCV_CPU_SIFIVE_U54,       rv64gcsu_priv1_10_0_cpu_init),
+    DEFINE_CPU(TYPE_RISCV_CPU_ANDES_NX25,       rv64gcsux_andes_priv1_10_0_cpu_init)
 #endif
 };
 

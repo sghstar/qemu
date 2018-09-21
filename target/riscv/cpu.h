@@ -59,6 +59,7 @@
 #define TYPE_RISCV_CPU_SIFIVE_U34       RISCV_CPU_TYPE_NAME("sifive-u34")
 #define TYPE_RISCV_CPU_SIFIVE_U54       RISCV_CPU_TYPE_NAME("sifive-u54")
 #define TYPE_RISCV_CPU_ANDES_N25        RISCV_CPU_TYPE_NAME("andes-n25")
+#define TYPE_RISCV_CPU_ANDES_NX25       RISCV_CPU_TYPE_NAME("andes-nx25")
 
 #define RV32 ((target_ulong)1 << (TARGET_LONG_BITS - 2))
 #define RV64 ((target_ulong)2 << (TARGET_LONG_BITS - 2))
