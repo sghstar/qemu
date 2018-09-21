@@ -1,5 +1,5 @@
 /*
- * QEMU RISC-V CPU CSR Extension Interface
+ * ANDES RISC-V CPU CSR Extension
  *
  * Copyright (c) 2018 Andes Tech. Corp.
  *
@@ -16,13 +16,12 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RISCV_CPU_CSR_EXT_IF_H
-#define RISCV_CPU_CSR_EXT_IF_H
+#ifndef ANDES_CSR_RISCV_CPU_H
+#define ANDES_CSR_RISCV_CPU_H
 
-typedef struct CPURVCsrExtIf {
-    void (*csr_validate_helper)(CPURISCVState *env, uint64_t which, uint64_t write, uintptr_t ra, int *next);
-    target_ulong (*csr_read_helper)(CPURISCVState *env, target_ulong csrno, int *next);
-    void (*csr_write_helper)(CPURISCVState *env, target_ulong value, target_ulong csrno, int *next);
-} CPURVCsrExtIf;
+void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong val_to_write, target_ulong csrno, int *next);
+target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next);
 
-#endif /* RISCV_CPU_CSR_EXT_IF_H */
+void andes_riscv_csrif_init(CPURISCVState *env);
+
+#endif /* ANDES_CSR_RISCV_CPU_H */
