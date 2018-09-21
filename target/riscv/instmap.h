@@ -48,6 +48,12 @@ enum {
     OPC_RISC_FNMADD = (0x4F),
 
     OPC_RISC_FP_ARITH = (0x53),
+
+    /* rv32x, rv64x */
+    OPC_RISC_CUSTOM_0 = (0x0B),
+    OPC_RISC_CUSTOM_1 = (0x2B),
+    OPC_RISC_CUSTOM_2 = (0x5B),
+    OPC_RISC_CUSTOM_3 = (0x7B),
 };
 
 #define MASK_OP_ARITH(op)   (MASK_OP_MAJOR(op) | (op & ((0x7 << 12) | \
