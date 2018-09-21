@@ -87,6 +87,20 @@ static const struct MemmapEntry {
     [ANDES_AE250_DEBUG]   = { 0xffff0000, 0x00000100 },
 };
 
+typedef struct ResetData {
+    RISCVCPU *cpu;
+    target_ulong vector;
+} ResetData;
+
+static void main_cpu_reset(void *opaque)
+{
+    ResetData *s = (ResetData *)opaque;
+    CPURISCVState *env = &s->cpu->env;
+
+    cpu_reset(CPU(s->cpu));
+    env->pc = s->vector;
+}
+
 static uint64_t load_kernel(const char *kernel_filename)
 {
     uint64_t kernel_entry, kernel_high;
@@ -115,6 +129,7 @@ static void riscv_andes_ae250_init(MachineState *machine)
     AndesAe250State *s = g_new0(AndesAe250State, 1);
     MemoryRegion *sys_mem = get_system_memory();
     MemoryRegion *main_mem = g_new(MemoryRegion, 1);
+    ResetData *reset_info;
     int i;
 
     /* Initialize SoC */
@@ -123,6 +138,10 @@ static void riscv_andes_ae250_init(MachineState *machine)
                             &error_abort, NULL);
     object_property_set_bool(OBJECT(&s->soc), true, "realized",
                             &error_abort);
+
+    reset_info = g_malloc0(sizeof(ResetData));
+    reset_info->cpu = s->soc.cpus.harts;
+    qemu_register_reset(main_cpu_reset, reset_info);
 
     /* Data Tightly Integrated Memory */
     memory_region_init_ram(main_mem, NULL, "riscv.andes.ae250.ram",
@@ -144,7 +163,7 @@ static void riscv_andes_ae250_init(MachineState *machine)
                           memmap[ANDES_AE250_SPI].base, &address_space_memory);
 
     if (machine->kernel_filename) {
-        load_kernel(machine->kernel_filename);
+        reset_info->vector = load_kernel(machine->kernel_filename);
     }
 }
 
