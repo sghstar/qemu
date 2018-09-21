@@ -785,3 +785,6 @@ void riscv_csrif_init(CPURISCVState *env)
     env->csrif.csr_read_helper = riscv_csr_read_helper;
     env->csrif.csr_write_helper = riscv_csr_write_helper;
 }
+
+#include "op_helper_andes_csr.c"
+#include "op_helper_andes_v5.c"

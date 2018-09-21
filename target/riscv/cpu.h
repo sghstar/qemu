@@ -58,6 +58,7 @@
 #define TYPE_RISCV_CPU_SIFIVE_E51       RISCV_CPU_TYPE_NAME("sifive-e51")
 #define TYPE_RISCV_CPU_SIFIVE_U34       RISCV_CPU_TYPE_NAME("sifive-u34")
 #define TYPE_RISCV_CPU_SIFIVE_U54       RISCV_CPU_TYPE_NAME("sifive-u54")
+#define TYPE_RISCV_CPU_ANDES_N25        RISCV_CPU_TYPE_NAME("andes-n25")
 
 #define RV32 ((target_ulong)1 << (TARGET_LONG_BITS - 2))
 #define RV64 ((target_ulong)2 << (TARGET_LONG_BITS - 2))
@@ -79,6 +80,7 @@
 #define RVC RV('C')
 #define RVS RV('S')
 #define RVU RV('U')
+#define RVX RV('X')
 
 /* S extension denotes that Supervisor mode exists, however it is possible
    to have a core that support S mode but does not have an MMU and there
@@ -314,5 +316,8 @@ void riscv_set_local_interrupt(RISCVCPU *cpu, target_ulong mask, int value);
 #endif
 
 #include "exec/cpu-all.h"
+#include "cpu_andes_csr.h"
+#include "cpu_andes_v5.h"
+#include "cpu_andes.h"
 
 #endif /* RISCV_CPU_H */

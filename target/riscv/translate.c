@@ -1941,3 +1941,6 @@ void riscv_isaif_init(CPURISCVState *env)
     env->isaif.decode_RV32_64C = decode_RV32_64C;
     env->isaif.decode_RV32_64G = decode_RV32_64G;
 }
+
+#include "translate_andes_v5.c"
+#include "translate_andes.c"
