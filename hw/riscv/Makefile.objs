@@ -12,3 +12,4 @@ obj-y += virt.o
 obj-y += andes_plmt.o
 obj-y += andes_plic.o
 obj-y += andes_ae250.o
+obj-y += andes_ae350.o
