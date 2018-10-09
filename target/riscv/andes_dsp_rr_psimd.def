@@ -1,0 +1,7 @@
+
+
+      CASE(clrs32)
+#ifndef NOT_TESTABLE
+      CASE(Dclz32)
+      CASE(Dclo32)
+#endif

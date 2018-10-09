@@ -1,0 +1,9 @@
+
+      CASE_ALIAS(sclip32, sclip32)
+      CASE_ALIAS(uclip32, uclip32)
+      //CASE_ALIAS(uclip32, uclip32)
+//      CASE_ALIAS(kslliw, ksllw)
+//      CASE_ALIAS(slli32, sll32)
+//      CASE_ALIAS(srli32, srl32)
+//      CASE_ALIAS(srai32, sra32)
+//      CASE_ALIAS(bitrevi, bitrev)

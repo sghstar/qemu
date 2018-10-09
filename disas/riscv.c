@@ -19,6 +19,7 @@
 
 #include "qemu/osdep.h"
 #include "disas/bfd.h"
+#include "target/riscv/andes_dsp_opcode.h"
 
 
 /* types */
@@ -136,6 +137,7 @@ typedef enum {
     rv_codec_u,
     rv_codec_uj,
     rv_codec_i,
+    rv_codec_uimm4,
     rv_codec_i_sh5,
     rv_codec_i_sh6,
     rv_codec_i_sh7,
@@ -501,6 +503,13 @@ typedef enum {
     rv_op_fsflags = 316,
     rv_op_fsrmi = 317,
     rv_op_fsflagsi = 318,
+#define CASE_ALIAS(NAME, ALIAS) CASE(NAME)
+#define CASE(NAME) \
+		rv_op_##NAME,
+#include "target/riscv/andes_dsp_rrr.def"
+#include "target/riscv/andes_dsp_rr_uimm4.def"
+#include "target/riscv/andes_dsp_rr_uimm3.def"
+#undef CASE
 } rv_op;
 
 /* structures */
@@ -1126,6 +1135,52 @@ const rv_opcode_data opcode_data[] = {
     { "fsflags", rv_codec_i_csr, rv_fmt_rd_rs1, NULL, 0, 0, 0 },
     { "fsrmi", rv_codec_i_csr, rv_fmt_rd_zimm, NULL, 0, 0, 0 },
     { "fsflagsi", rv_codec_i_csr, rv_fmt_rd_zimm, NULL, 0, 0, 0 },
+    /* SIMD 8-bit */
+    /* ADD */
+    { "add8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "radd8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "uradd8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "kadd8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ukadd8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* SUB */
+    { "sub8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "rsub8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ursub8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ksub8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "uksub8", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* SIMD 16-bit */
+    /* ADD */
+    { "add16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "radd16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "uradd16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "kadd16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ukadd16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* SUB */
+    { "sub16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "rsub16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ursub16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ksub16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "uksub16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* Cross addition and subtraction */
+    { "cras16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "cras16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "urcras16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "kcras16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ukcras16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* Cross subtraction and addition */
+    { "crsa16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "crsa16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "urcrsa16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "kcrsa16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "ukcrsa16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    /* 16-bit shift */
+    { "sra16", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "srai16", rv_codec_uimm4, rv_fmt_rd_rs1_imm, NULL, 0, 0, 0 },
+
+
+    // ANCOR
+    { "maxw", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
+    { "minw", rv_codec_r, rv_fmt_rd_rs1_rs2, NULL, 0, 0, 0 },
 };
 
 /* CSR names */
@@ -1335,6 +1390,148 @@ static const char *csr_name(int csrno)
     }
 }
 
+static void decode_dsp_opcode(rv_decode *dec, rv_isa isa)
+{
+    rv_inst inst = dec->inst;
+    rv_opcode op = rv_op_illegal;
+    int bit24 = inst & 0x01000000;
+    switch (inst >> 25) {
+/*
+      case radd16:
+	op = rv_op_radd16;
+	break;
+      case rsub16:
+	op = rv_op_rsub16;
+	break;
+      case kadd16:
+	op = rv_op_kadd16;
+	break;
+      case ksub16:
+	op = rv_op_ksub16;
+	break;
+      case uradd16:
+	op = rv_op_uradd16;
+	break;
+      case ursub16:
+	op = rv_op_ursub16;
+	break;
+      case ukadd16:
+	op = rv_op_ukadd16;
+	break;
+      case uksub16:
+	op = rv_op_uksub16;
+	break;
+      case add16:
+	op = rv_op_add16;
+	break;
+      case sub16:
+	op = rv_op_sub16;
+	break;
+      case add8 :
+	op = rv_op_add8;
+	break;
+      case sub8:
+	op = rv_op_sub8;
+	break;
+      case kadd8:
+	op = rv_op_kadd8;
+	break;
+      case ksub8:
+	op = rv_op_ksub8;
+	break;
+      case ukadd8:
+	op = rv_op_ukadd8;
+	break;
+      case uksub8:
+	op = rv_op_uksub8;
+	break;
+      case radd8:
+	op = rv_op_radd8;
+	break;
+      case rsub8:
+	op = rv_op_rsub8;
+	break;
+      case uradd8:
+	op = rv_op_uradd8;
+	break;
+      case ursub8:
+	op = rv_op_ursub8;
+	break;
+      case maxw:
+	op = rv_op_maxw;
+	break;
+      case minw:
+	op = rv_op_minw;
+	break;
+
+      case cras16:
+	op = rv_op_cras16;
+	break;
+      case rcras16:
+	op = rv_op_rcras16;
+	break;
+      case urcras16:
+	op = rv_op_urcras16;
+	break;
+      case kcras16:
+	op = rv_op_kcras16;
+	break;
+      case ukcras16:
+	op = rv_op_ukcras16;
+	break;
+
+      case crsa16:
+	op = rv_op_crsa16;
+	break;
+      case rcrsa16:
+	op = rv_op_rcrsa16;
+	break;
+      case urcrsa16:
+	op = rv_op_urcrsa16;
+	break;
+      case kcrsa16:
+	op = rv_op_kcrsa16;
+	break;
+      case ukcrsa16:
+	op = rv_op_ukcrsa16;
+	break;
+      case sra16:
+	op = rv_op_sra16;
+	break;
+      case srai16u:
+	op = (bit24 == 0) ? rv_op_srai16 : rv_op_srai16u;
+	break;
+      case srl16:
+	op = rv_op_srl16;
+	break;
+      case srl16u:
+	op = rv_op_srl16u;
+	break;
+      case srli16u:
+	op = (bit24 == 0) ? rv_op_srli16: rv_op_srli16u;
+	break;
+      case sll16:
+	op = rv_op_sll16;
+	break;
+      case ksll16:
+	op = rv_op_ksll16;
+	break;
+      case kslli16:
+	op = (bit24 == 0) ? rv_op_slli16: rv_op_kslli16;
+	break;
+      case kslra16:
+	op = rv_op_kslra16;
+	break;
+      case kslra16u:
+	op = rv_op_kslra16u;
+	break;
+*/
+
+      default:
+	break;
+    }
+    dec->op = op;
+}
 /* decode opcode */
 
 static void decode_inst_opcode(rv_decode *dec, rv_isa isa)
@@ -2085,6 +2282,10 @@ static uint32_t operand_csr12(rv_inst inst)
     return (inst << 32) >> 52;
 }
 
+static uint32_t operand_uimm4(rv_inst inst)
+{
+    return (inst << 32) >> 52;
+}
 static int32_t operand_imm12(rv_inst inst)
 {
     return ((int64_t)inst << 32) >> 52;
@@ -2252,6 +2453,12 @@ static void decode_inst_operands(rv_decode *dec)
         dec->rd = operand_rd(inst);
         dec->rs1 = dec->rs2 = rv_ireg_zero;
         dec->imm = operand_jimm20(inst);
+        break;
+    case rv_codec_uimm4:
+        dec->rd = operand_rd(inst);
+        dec->rs1 = operand_rs1(inst);
+        dec->rs2 = rv_ireg_zero;
+        dec->imm = operand_uimm4(inst);
         break;
     case rv_codec_i:
         dec->rd = operand_rd(inst);
@@ -2745,13 +2952,15 @@ static size_t inst_length(rv_inst inst)
      *      aa - 16 bit aa != 11
      *   bbb11 - 32 bit bbb != 111
      *  011111 - 48 bit
-     * 0111111 - 64 bit
+     * 0111111 - 128 bit
+     * 1111111 - 32 bit Andes DSP ISA.
      */
 
     return (inst &      0b11) != 0b11      ? 2
          : (inst &   0b11100) != 0b11100   ? 4
          : (inst &  0b111111) == 0b011111  ? 6
          : (inst & 0b1111111) == 0b0111111 ? 8
+	 : (inst & 0b1111111) == 0b1111111 ? 4
          : 0;
 }
 
@@ -2979,7 +3188,10 @@ disasm_inst(char *buf, size_t buflen, rv_isa isa, uint64_t pc, rv_inst inst)
     rv_decode dec = { 0 };
     dec.pc = pc;
     dec.inst = inst;
-    decode_inst_opcode(&dec, isa);
+    if ((dec.inst & 0b1111111) == 0b1111111)
+      decode_dsp_opcode(&dec, isa);
+    else
+      decode_inst_opcode(&dec, isa);
     decode_inst_operands(&dec);
     decode_inst_decompress(&dec, isa);
     decode_inst_lift_pseudo(&dec);

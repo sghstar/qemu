@@ -90,6 +90,10 @@ enum andes_csr_name {
 
     /* user mode CSRs */
     CSR_UITB            = 0x800,
+    CSR_UCODE           = 0x801,
+    CSR_LOOPB           = 0x802,
+    CSR_LOOPE           = 0x803,
+    CSR_LOOPC           = 0x804,
     CSR_UCCTLBEGINADDR  = 0x80b,
     CSR_UCCTLCOMMAND    = 0x80c,
 
@@ -392,6 +396,18 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         break;
     case CSR_UITB:
         csr = ext->uitb;
+        break;
+    case CSR_UCODE:
+        csr = ext->ucode;
+        break;
+    case CSR_LOOPB:
+        csr = ext->loopb;
+        break;
+    case CSR_LOOPE:
+        csr = ext->loope;
+        break;
+    case CSR_LOOPC:
+        csr = ext->loopc;
         break;
     case CSR_MCCTLBEGINADDR:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
@@ -840,6 +856,18 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
         break;
     case CSR_UITB:
         ext->uitb = (ext->uitb & 0x1) | (value & ~0x3);
+        break;
+    case CSR_UCODE:
+        ext->ucode = value;
+        break;
+    case CSR_LOOPB:
+        ext->loopb = value;
+        break;
+    case CSR_LOOPE:
+        ext->loope = value;
+        break;
+    case CSR_LOOPC:
+        ext->loopc = value;
         break;
     case CSR_MCCTLBEGINADDR:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {

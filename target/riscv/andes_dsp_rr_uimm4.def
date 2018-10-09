@@ -1,0 +1,10 @@
+
+// 16-bit shift
+      CASE_ALIAS(srai16, sra16)
+      CASE_ALIAS(srai16_u, sra16_u)
+      CASE_ALIAS(srli16, srl16)
+		  CASE_ALIAS(srli16_u, srl16_u)
+      CASE_ALIAS(slli16, sll16)
+//		  CASE_ALIAS(kslli16, ksll16)
+		  CASE_ALIAS(sclip16, sclip16)
+		  CASE_ALIAS(uclip16, uclip16)

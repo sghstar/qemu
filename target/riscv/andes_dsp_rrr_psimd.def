@@ -1,0 +1,103 @@
+
+
+		CASE(pkbb16)
+		CASE(pkbt16)
+		CASE(pktb16)
+		CASE(pktt16)
+
+		CASE(smmul)
+		CASE(smmul_u)
+//		CASE(kwmmul)
+//		CASE(kwmmul_u)
+
+		CASE(smmwb)
+		CASE(smmwb_u)
+		CASE(smmwt)
+		CASE(smmwt_u)
+//		CASE(kmmwb2)
+//		CASE(kmmwb2_u)
+//		CASE(kmmwt2)
+//		CASE(kmmwt2_u)
+
+		CASE(smbb16)
+		CASE(smbt16)
+		CASE(smtt16)
+//		CASE(kmda)
+//		CASE(kmxda)
+		CASE(smds)
+		CASE(smdrs)
+		CASE(smxds)
+
+		// FIXME:
+		//CASE(smal)
+
+		//CASE(pbsad)
+
+		//CASE(kaddh)
+		//CASE(ksubh)
+		//CASE(khmbb)
+		//CASE(khmbt)
+		//CASE(khmtt)
+
+		//CASE(kaddw)
+		//CASE(ksubw)
+		//CASE(kdmbb)
+		//CASE(kdmbt)
+		//CASE(kdmtt)
+		//CASE(kslraw)
+		//CASE(kslraw_u)
+		//CASE(ksllw)
+
+		CASE(raddw)
+		CASE(uraddw)
+		CASE(rsubw)
+		CASE(ursubw)
+
+
+#ifdef TESTING
+#if (__riscv_xlen == 64)
+#endif
+		CASE(smds32)
+		CASE(smdrs32)
+		CASE(smxds32)
+
+		CASE(smbb32)
+		CASE(smbt32)
+		CASE(smtt32)
+
+		CASE(smin32)
+		CASE(umin32)
+		CASE(smax32)
+		CASE(umax32)
+
+		CASE(sll32)
+		CASE(srl32)
+		CASE(sra32)
+
+		CASE(cras32)
+		CASE(rcras32)
+		CASE(urcras32)
+		CASE(crsa32)
+		CASE(rcrsa32)
+		CASE(urcrsa32)
+
+		CASE(stas32)
+		CASE(rstas32)
+		CASE(urstas32)
+		CASE(stsa32)
+		CASE(rstsa32)
+		CASE(urstsa32)
+
+		CASE(add32)
+		CASE(radd32)
+		CASE(uradd32)
+		CASE(sub32)
+		CASE(rsub32)
+		CASE(ursub32)
+#ifdef TESTING
+#endif
+#endif
+
+		CASE(ave)
+		CASE(bitrev)
+		//CASE(bpick)

@@ -1,0 +1,24 @@
+
+// 16-bit misc.
+//      CASE(kabs16)
+      CASE(clrs16)
+      CASE(clz16)
+  //    CASE(clo16)
+
+// 8-bit misc.
+ //     CASE(kabs8)
+      CASE(clrs8)
+      CASE(clz8)
+   //   CASE(clo8)
+
+// 8-bit unpacking
+		CASE(sunpkd810)
+		CASE(sunpkd820)
+		CASE(sunpkd830)
+		CASE(sunpkd831)
+		CASE(sunpkd832)
+		CASE(zunpkd810)
+		CASE(zunpkd820)
+		CASE(zunpkd830)
+		CASE(zunpkd831)
+		CASE(zunpkd832)

@@ -18,42 +18,45 @@
 
 #define MASK_OP_MAJOR(op)  (op & 0x7F)
 enum {
-    /* rv32i, rv64i, rv32m */
-    OPC_RISC_LUI    = (0x37),
-    OPC_RISC_AUIPC  = (0x17),
-    OPC_RISC_JAL    = (0x6F),
-    OPC_RISC_JALR   = (0x67),
-    OPC_RISC_BRANCH = (0x63),
-    OPC_RISC_LOAD   = (0x03),
-    OPC_RISC_STORE  = (0x23),
-    OPC_RISC_ARITH_IMM  = (0x13),
-    OPC_RISC_ARITH      = (0x33),
-    OPC_RISC_FENCE      = (0x0F),
-    OPC_RISC_SYSTEM     = (0x73),
+  /* rv32i, rv64i, rv32m */
+  OPC_RISC_LUI = (0x37),
+  OPC_RISC_AUIPC = (0x17),
+  OPC_RISC_JAL = (0x6F),
+  OPC_RISC_JALR = (0x67),
+  OPC_RISC_BRANCH = (0x63),
+  OPC_RISC_LOAD = (0x03),
+  OPC_RISC_STORE = (0x23),
+  OPC_RISC_ARITH_IMM = (0x13),
+  OPC_RISC_ARITH = (0x33),
+  OPC_RISC_FENCE = (0x0F),
+  OPC_RISC_SYSTEM = (0x73),
 
-    /* rv64i, rv64m */
-    OPC_RISC_ARITH_IMM_W = (0x1B),
-    OPC_RISC_ARITH_W = (0x3B),
+  /* rv64i, rv64m */
+  OPC_RISC_ARITH_IMM_W = (0x1B),
+  OPC_RISC_ARITH_W = (0x3B),
 
-    /* rv32a, rv64a */
-    OPC_RISC_ATOMIC = (0x2F),
+  /* rv32a, rv64a */
+  OPC_RISC_ATOMIC = (0x2F),
 
-    /* floating point */
-    OPC_RISC_FP_LOAD = (0x7),
-    OPC_RISC_FP_STORE = (0x27),
+  /* floating point */
+  OPC_RISC_FP_LOAD = (0x7),
+  OPC_RISC_FP_STORE = (0x27),
 
-    OPC_RISC_FMADD = (0x43),
-    OPC_RISC_FMSUB = (0x47),
-    OPC_RISC_FNMSUB = (0x4B),
-    OPC_RISC_FNMADD = (0x4F),
+  OPC_RISC_FMADD = (0x43),
+  OPC_RISC_FMSUB = (0x47),
+  OPC_RISC_FNMSUB = (0x4B),
+  OPC_RISC_FNMADD = (0x4F),
 
-    OPC_RISC_FP_ARITH = (0x53),
+  OPC_RISC_FP_ARITH = (0x53),
 
-    /* rv32x, rv64x */
-    OPC_RISC_CUSTOM_0 = (0x0B),
-    OPC_RISC_CUSTOM_1 = (0x2B),
-    OPC_RISC_CUSTOM_2 = (0x5B),
-    OPC_RISC_CUSTOM_3 = (0x7B),
+  /* rv32x, rv64x */
+  OPC_RISC_CUSTOM_0 = (0x0B),
+  OPC_RISC_CUSTOM_1 = (0x2B),
+  OPC_RISC_CUSTOM_2 = (0x5B),
+  OPC_RISC_CUSTOM_3 = (0x7B),
+  /* Andes DSP ISA */
+  OPC_RISC_DSP = (0x7F),
+
 };
 
 #define MASK_OP_ARITH(op)   (MASK_OP_MAJOR(op) | (op & ((0x7 << 12) | \

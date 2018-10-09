@@ -18,6 +18,9 @@
  */
 
 #include "exec/cpu_ldst.h"
+#include <stdio.h>
+#include "op_helper_andes_dsp_simd.c"
+#include "op_helper_andes_dsp_psimd.c"
 
 target_ulong helper_andes_v5_bfo_x(target_ulong rd, target_ulong rs1,
                                    target_ulong insn)

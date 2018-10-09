@@ -1,0 +1,101 @@
+
+// SIMD
+// 8-bit add
+		CASE(add8)
+      CASE(radd8)
+      CASE(uradd8)
+//      CASE(kadd8)
+//      CASE(ukadd8)
+
+// 8-bit sub
+      CASE(sub8)
+      CASE(rsub8)
+      CASE(ursub8)
+//      CASE(ksub8)
+//      CASE(uksub8)
+
+// 16-bit add
+      CASE(add16)
+      CASE(radd16)
+      CASE(uradd16)
+//      CASE(kadd16)
+//      CASE(ukadd16)
+
+// 16-bit sub
+      CASE(sub16)
+      CASE(rsub16)
+      CASE(ursub16)
+//      CASE(ksub16)
+//      CASE(uksub16)
+
+// 16-bit cross add and sub
+      CASE(cras16)
+      CASE(rcras16)
+      CASE(urcras16)
+//      CASE(kcras16)
+//      CASE(ukcras16)
+
+// 16-bit cross sub and add
+      CASE(crsa16)
+      CASE(rcrsa16)
+      CASE(urcrsa16)
+ //     CASE(kcrsa16)
+ //     CASE(ukcrsa16)
+
+// 16-bit shift
+      CASE(sra16)
+      CASE(sra16_u)
+      CASE(srl16)
+      CASE(srl16_u)
+      CASE(sll16)
+  //    CASE(ksll16)
+      //CASE(kslra16)
+      //CASE(kslra16_u)
+
+// 8-bit shift
+      CASE(sra8)
+      CASE(sra8_u)
+      CASE(srl8)
+      CASE(srl8_u)
+      CASE(sll8)
+     // CASE(ksll8)
+      //CASE(kslra8)
+      //CASE(kslra8_u)
+// 16-bit cmp
+		  CASE(cmpeq16)
+		  CASE(scmplt16)
+		  CASE(scmple16)
+		  CASE(ucmplt16)
+		  CASE(ucmple16)
+// 8-bit cmp
+		  CASE(cmpeq8)
+		  CASE(scmplt8)
+		  CASE(scmple8)
+		  CASE(ucmplt8)
+		  CASE(ucmple8)
+// 16-bit misc
+		  CASE(smin16)
+		  CASE(umin16)
+		  CASE(smax16)
+		  CASE(umax16)
+//		  CASE(khm16)
+//		  CASE(khmx16)
+
+// 8-bit misc
+		  CASE(smin8)
+		  CASE(umin8)
+		  CASE(smax8)
+		  CASE(umax8)
+//		  CASE(khm8)
+//		  CASE(khmx8)
+
+
+		CASE(stas16)
+		CASE(rstas16)
+		CASE(urstas16)
+		CASE(stsa16)
+		CASE(rstsa16)
+		CASE(urstsa16)
+
+      CASE(maxw)
+      CASE(minw)

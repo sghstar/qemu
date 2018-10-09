@@ -1,0 +1,10 @@
+
+// 8-bit shift
+CASE_ALIAS(srai8, sra8)
+CASE_ALIAS(srli8, srl8)
+CASE_ALIAS(slli8, sll8)
+//CASE_ALIAS(kslli8, ksll8)
+//CASE_ALIAS(srai8_u, sra8_u)
+//CASE_ALIAS(srli8_u, srl8_u)
+CASE_ALIAS(sclip8, sclip8)
+CASE_ALIAS(uclip8, uclip8)

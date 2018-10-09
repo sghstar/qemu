@@ -1,0 +1,14 @@
+
+// 64-bit add
+		CASE_ALIAS(add64, sadd64)
+		CASE(radd64)
+		  CASE(uradd64)
+//   		CASE(kadd64)
+//		  CASE(ukadd64)
+
+		CASE_ALIAS(sub64, sadd64)
+		CASE(rsub64)
+		  CASE(ursub64)
+//   		CASE(ksub64)
+//		  CASE(uksub64)
+		  CASE(smal)

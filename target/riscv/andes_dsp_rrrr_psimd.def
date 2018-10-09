@@ -1,0 +1,32 @@
+
+
+
+		 //CASE(kmmac)
+		 //CASE(kmmac_u)
+		 //CASE(kmmsb)
+		 //CASE(kmmsb_u)
+
+		//CASE(kmmawb)
+		//CASE(kmmawb_u)
+		//CASE(kmmawt)
+		//CASE(kmmawt_u)
+		//CASE(kmmawb2)
+		//CASE(kmmawb2_u)
+		//CASE(kmmawt2)
+		//CASE(kmmawt2_u)
+
+		//CASE(kmabb)
+		//CASE(kmabt)
+		//CASE(kmatt)
+		//CASE(kmada)
+		//CASE(kmaxda)
+		//CASE(kmads)
+		//CASE(kmadrs)
+		//CASE(kmaxds)
+		//CASE(kmsda)
+		//CASE(kmsxda)
+
+//		CASE(pbsada)
+#ifndef NOT_TESTABLE
+		CASE(maddr32)
+#endif
