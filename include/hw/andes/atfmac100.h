@@ -29,6 +29,9 @@ typedef struct ATFMAC100State {
     qemu_irq irq;
     MemoryRegion mmio;
 
+    /* Static properties */
+    uint32_t revision;
+
     /* registers */
     uint32_t isr;
     uint32_t imr; /* interrupt enable register */
