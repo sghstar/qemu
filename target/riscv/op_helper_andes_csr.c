@@ -56,6 +56,9 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
     CPURVAndesExt *ext = env->ext;
     target_ulong csr;
 
+    if (next) {
+        *next = OK; /* assume */
+    }
     switch (csrno) {
     case CSR_MICM_CFG: /* MRO */
         csr = ext->micm_cfg;
@@ -138,6 +141,9 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
 {
     CPURVAndesExt *ext = env->ext;
 
+    if (next) {
+        *next = OK; /* assume */
+    }
     switch (csrno) {
     case CSR_MICM_CFG: /* MRO */
     case CSR_MDCM_CFG: /* MRO */
