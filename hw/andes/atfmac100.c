@@ -31,6 +31,8 @@
 
 #define LOGGE(x...) qemu_log_mask(LOG_GUEST_ERROR,x)
 
+#define ATFMAC100_MODID_VALUE 0x00020118
+
 /* registers */
 enum {
   REG_ISR              = 0x00,
@@ -1097,6 +1099,8 @@ static const VMStateDescription vmstate_atfmac100 = {
 
 static Property atfmac100_properties[] = {
     DEFINE_NIC_PROPERTIES(ATFMAC100State, conf),
+    DEFINE_PROP_UINT32("revision", ATFMAC100State, revision,
+                       ATFMAC100_MODID_VALUE),
     DEFINE_PROP_END_OF_LIST(),
 };
 
