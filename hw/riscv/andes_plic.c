@@ -3,25 +3,17 @@
  *
  * Copyright (c) 2018 Andes Tech. Corp.
  *
- * This provides a parameterizable interrupt controller based on Andes' PLIC.
+  * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU General Public License,
+ * version 2 or later, as published by the Free Software Foundation.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is distributed in the hope it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "qemu/osdep.h"
@@ -75,7 +67,7 @@ update_eip_vectored(void *plic)
         if (!env) {
             continue;
         }
-        CPUAndesState *ext = env->extension_data;
+        CPURVAndesExt *ext = env->ext;
         int level = 0;
         int irq_id = 0;
         switch (mode) {
@@ -90,7 +82,7 @@ update_eip_vectored(void *plic)
                     assert(irq_id);
                 }
             }
-            LOG("%s: M level %d, irq_id %d\n", __func__, level, irq_id);
+            yLOG("%s: M level %d, irq_id %d\n", __func__, level, irq_id);
             riscv_set_local_interrupt(RISCV_CPU(cpu), ss->m_mode_mip_mask,
                                       level);
             break;
@@ -105,7 +97,7 @@ update_eip_vectored(void *plic)
                     assert(irq_id);
                 }
             }
-            LOG("%s: S level %d, irq_id %d\n", __func__, level, irq_id);
+            yLOG("%s: S level %d, irq_id %d\n", __func__, level, irq_id);
             riscv_set_local_interrupt(RISCV_CPU(cpu), ss->s_mode_mip_mask,
                                       level);
             break;
@@ -145,7 +137,7 @@ andes_plic_read(void *opaque, hwaddr addr, unsigned size)
     uint32_t word;
 
     if ((addr & 0x3)) {
-        error_report("%s: invalid register write: %08x", __func__, (uint32_t)addr);
+        error_report("%s: invalid register read: %08x", __func__, (uint32_t)addr);
     }
 
     /* pending RW */
@@ -196,7 +188,7 @@ andes_plic_read(void *opaque, hwaddr addr, unsigned size)
         }
     }
 
-    LOG("%s:  addr %08x, size %08x, value %08x\n", __func__, (int)addr, size,
+    LOG("== %s %s:  addr %08x, size %08x, value %08x ==\n", (ss->m_mode_mip_mask==MIP_MEIP) ? "":"sw", __func__, (int)addr, size,
         (int)value);
     return value;
 }
@@ -207,7 +199,7 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
     AndesPLICState *s = ANDES_PLIC(opaque);
     SiFivePLICState *ss = SIFIVE_PLIC(s);
     uint32_t word, xchg;
-    LOG("%s: addr %08x, size %08x, value %08x\n", __func__, (int)addr, size, (int)value);
+    LOG("== %s %s: addr %08x, size %08x, value %08x ==\n", (ss->m_mode_mip_mask==MIP_MEIP) ? "":"sw", __func__, (int)addr, size, (int)value);
 
     if ((addr & 0x3)) {
         error_report("%s: invalid register write: %08x", __func__, (uint32_t)addr);
@@ -266,7 +258,7 @@ andes_plic_write(void *opaque, hwaddr addr, uint64_t value, unsigned size)
                 CPUState *cpu = qemu_get_cpu(hartid);
                 CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
                 if (env) {
-                    CPUAndesState *ext = env->extension_data;
+                    CPURVAndesExt *ext = env->ext;
                     switch (env->priv) {
                     case PRV_M:
                         if (ext->vectored_irq_m) {
@@ -379,7 +371,6 @@ static Property sifive_plic_properties[] = {
 
 static void andes_plic_class_init(ObjectClass *klass, void *data)
 {
-    LOG("%s:\n", __func__);
     DeviceClass *dc = DEVICE_CLASS(klass);
     /* SiFivePLICClass *sdc = SIFIVE_PLIC_CLASS(klass); */
     AndesPLICClass *adc = ANDES_PLIC_CLASS(klass);
@@ -416,7 +407,6 @@ DeviceState *andes_plic_create(hwaddr addr, char *hart_config,
     uint32_t context_base, uint32_t context_stride,
     uint32_t aperture_size)
 {
-    LOG("%s:\n", __func__);
     DeviceState *dev = qdev_create(NULL, TYPE_ANDES_PLIC);
     /* TODO: better inheritance, copy from sifive_plic_create() */
     assert(enable_stride == (enable_stride & -enable_stride));
@@ -447,7 +437,6 @@ andes_plic_swint_create(hwaddr addr, char *hart_config, uint32_t num_sources,
                         uint32_t context_stride, uint32_t aperture_size,
                         uint32_t m_mode_mip_mask, uint32_t s_mode_mip_mask)
 {
-    LOG("%s:\n", __func__);
     DeviceState *dev = qdev_create(NULL, TYPE_ANDES_PLIC);
     /* TODO: better inheritance, copy from sifive_plic_create() */
     assert(enable_stride == (enable_stride & -enable_stride));
