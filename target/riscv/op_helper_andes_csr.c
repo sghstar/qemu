@@ -36,6 +36,9 @@ enum andes_csr_name {
     CSR_MDCAUSE     = 0x7c9,
     CSR_MPFT_CTL    = 0x7c5,
     CSR_MMISC_CTL   = 0x7d0,
+    CSR_MCCTLBEGINADDR = 0x7cb,
+    CSR_MCCTLCOMMAND   = 0x7cc,
+    CSR_MCCTLDATA      = 0x7cd,
 
     /* internal machine mode CSRs */
     CSR_MRANDESQ    = 0x7fc,
@@ -47,9 +50,131 @@ enum andes_csr_name {
     CSR_DEXC2DBG    = 0x7e0,
     CSR_DDCAUSE     = 0x7e1,
 
+    /* supervisor mode CSRs */
+    CSR_SCCTLDATA   = 0x9cd,
+
     /* user mode CSRs */
     CSR_UITB        = 0x800,
+    CSR_UCCTLBEGINADDR = 0x80b,
+    CSR_UCCTLCOMMAND   = 0x80c,
 };
+
+enum andes_cctl_command {
+    L1D_VA_INVAL = 0,
+    L1D_VA_WB,
+    L1D_VA_WBINVAL,
+    L1D_VA_LOCK,
+    L1D_VA_UNLOCK = 4,
+    L1D_WBINVAL_ALL = 6,
+    L1D_WB_ALL,
+    L1I_VA_INVAL = 8,
+    L1I_VA_LOCK = 11,
+    L1I_VA_UNLOCK = 12,
+    L1D_IX_INVAL = 16,
+    L1D_IX_WB,
+    L1D_IX_WBINVAL,
+    L1D_IX_RTAG,
+    L1D_IX_RDATA = 20,
+    L1D_IX_WTAG,
+    L1D_IX_WDATA,
+    L1D_INVAL_ALL,
+    L1I_IX_INVAL = 24,
+    L1I_IX_RTAG = 27,
+    L1I_IX_RDATA = 28,
+    L1I_IX_WTAG,
+    L1I_IX_WDATA,
+};
+
+static int do_cctl_command(CPURISCVState *env, target_ulong cmd, int mode)
+{
+#ifndef CONFIG_USER_ONLY
+    CPUState *cs = CPU(riscv_env_get_cpu(env));
+#if 0    
+    CPURVAndesExt *ext = env->ext;
+    target_ulong va;
+    hwaddr pa;
+#endif
+
+    if (mode > env->priv) {
+        do_raise_exception_err(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
+        return NG;
+    }
+
+    switch(cmd) {
+    case L1D_VA_INVAL:
+        break;
+    case L1D_VA_WB:
+        break;
+    case L1D_VA_WBINVAL:
+        break;
+    case L1D_VA_LOCK:
+        break;
+    case L1D_VA_UNLOCK:
+        break;
+    case L1D_WBINVAL_ALL:
+        break;
+    case L1D_WB_ALL:
+        break;
+    case L1I_VA_INVAL:
+        /* invalidate jit code cache */
+#if 1
+        /* TODO: flush TBs within VA range instead of all */
+        tb_flush(cs);
+# else
+        if (mode == PRV_M) {
+            va = ext->mcctlbeginaddr;
+        } else if (mode == PRV_U) {
+            va = ext->ucctlbeginaddr;
+        } else {
+            do_raise_exception_err(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
+            return NG;
+        }
+        pa = riscv_cpu_get_phys_page_debug(cs, va);
+        tb_invalidate_phys_range(pa, pa + 1);
+        tb_invalidate_phys_addr(NULL, pa, NULL);
+#endif
+        break;
+    case L1I_VA_LOCK:
+        break;
+    case L1I_VA_UNLOCK:
+        break;
+    case L1D_IX_INVAL:
+        break;
+    case L1D_IX_WB:
+        break;
+    case L1D_IX_WBINVAL:
+        break;
+    case L1D_IX_RTAG:
+        break;
+    case L1D_IX_RDATA:
+        break;
+    case L1D_IX_WTAG:
+        break;
+    case L1D_IX_WDATA:
+        break;
+    case L1D_INVAL_ALL:
+        break;
+    case L1I_IX_INVAL:
+        /* invalidate jit code cache */
+        /* TODO: flush TBs within INDEX range instead of all */
+        tb_flush(cs);
+        break;
+    case L1I_IX_RTAG:
+        break;
+    case L1I_IX_RDATA:
+        break;
+    case L1I_IX_WTAG:
+        break;
+    case L1I_IX_WDATA:
+        /* TODO */
+        assert(0);
+        break;
+    default:
+        qemu_log("== %s: Unknow command %08lx ==\n", __func__, (long)cmd);
+    }
+#endif
+    return 0;
+}
 
 target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next)
 {
@@ -125,6 +250,24 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         break;
     case CSR_UITB:
         csr = ext->uitb;
+        break;
+    case CSR_MCCTLBEGINADDR:
+        csr = ext->mcctlbeginaddr;
+        break;
+    case CSR_MCCTLCOMMAND:
+        csr = ext->mcctlcommand;
+        break;
+    case CSR_MCCTLDATA:
+        csr = ext->mcctldata;
+        break;
+    case CSR_SCCTLDATA:
+        csr = ext->scctldata;
+        break;
+    case CSR_UCCTLBEGINADDR:
+        csr = ext->ucctlbeginaddr;
+        break;
+    case CSR_UCCTLCOMMAND:
+        csr = ext->ucctlcommand;
         break;
     default:
         csr = 0xdeadbeef;
@@ -210,6 +353,26 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
         break;
     case CSR_UITB:
         ext->uitb = (ext->uitb & 0x1) | (value & ~0x3);
+        break;
+    case CSR_MCCTLBEGINADDR:
+        ext->mcctlbeginaddr = value;
+        break;
+    case CSR_MCCTLCOMMAND:
+        do_cctl_command(env, value, PRV_M);
+        ext->mcctlcommand = value;
+        break;
+    case CSR_MCCTLDATA:
+        ext->mcctldata = value;
+        break;
+    case CSR_SCCTLDATA:
+        ext->scctldata = value;
+        break;
+    case CSR_UCCTLBEGINADDR:
+        ext->ucctlbeginaddr = value;
+        break;
+    case CSR_UCCTLCOMMAND:
+        do_cctl_command(env, value, PRV_U);
+        ext->ucctlcommand = value;
         break;
     default:
         if (next) {

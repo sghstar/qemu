@@ -47,6 +47,12 @@ struct CPURVAndesExt {
     target_ulong dexc2dbg;
     target_ulong ddcause;
     target_ulong uitb;
+    target_ulong mcctlbeginaddr;
+    target_ulong mcctlcommand;
+    target_ulong mcctldata;
+    target_ulong scctldata;
+    target_ulong ucctlbeginaddr;
+    target_ulong ucctlcommand;
 };
 
 void andes_riscv_isaif_init(CPURISCVState *env);
