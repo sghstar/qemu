@@ -53,6 +53,16 @@ struct CPURVAndesExt {
     target_ulong scctldata;
     target_ulong ucctlbeginaddr;
     target_ulong ucctlcommand;
+
+    /* trigger CSRs */
+    target_ulong tselect;
+    target_ulong tdata1;
+    target_ulong tdata2;
+    target_ulong tdata3;
+    target_ulong tinfo;
+    target_ulong tcontrol;
+    target_ulong mcontext;
+    target_ulong scontext;
 };
 
 void andes_riscv_isaif_init(CPURISCVState *env);

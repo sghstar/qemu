@@ -36,6 +36,24 @@ enum andes_csr_name {
     CSR_MDCAUSE     = 0x7c9,
     CSR_MPFT_CTL    = 0x7c5,
     CSR_MMISC_CTL   = 0x7d0,
+
+    /* trigger CSRs */
+    // CSR_TSELECT  = 0x7a0,
+    // CSR_TDATA1   = 0x7a1,
+    // CSR_TDATA2   = 0x7a2,
+    // CSR_TDATA3   = 0x7a3,
+    CSR_TINFO    = 0x7a4,
+    CSR_TCONTROL = 0x7a5,
+    CSR_MCONTEXT = 0x7a8,
+    CSR_SCONTEXT = 0x7aa,
+    CSR_MCONTROL = CSR_TDATA1,
+    CSR_ICOUNT   = CSR_TDATA1,
+    CSR_ITRIGGER = CSR_TDATA1,
+    CSR_ETRIGGER = CSR_TDATA1,
+    CSR_TEXTRA32 = CSR_TDATA3,
+    CSR_TEXTRA64 = CSR_TDATA3,
+
+
     CSR_MCCTLBEGINADDR = 0x7cb,
     CSR_MCCTLCOMMAND   = 0x7cc,
     CSR_MCCTLDATA      = 0x7cd,
@@ -89,7 +107,7 @@ static int do_cctl_command(CPURISCVState *env, target_ulong cmd, int mode)
 {
 #ifndef CONFIG_USER_ONLY
     CPUState *cs = CPU(riscv_env_get_cpu(env));
-#if 0    
+#if 0
     CPURVAndesExt *ext = env->ext;
     target_ulong va;
     hwaddr pa;
@@ -269,6 +287,31 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
     case CSR_UCCTLCOMMAND:
         csr = ext->ucctlcommand;
         break;
+    case CSR_TSELECT:
+        csr = ext->tselect;
+        break;
+    case CSR_TDATA1: /* CSR_MCONTROL, CSR_ICOUNT, CSR_ITRIGGER, or CSR_ETRIGGER */
+        csr = ext->tdata1;
+        break;
+    case CSR_TDATA2:
+        csr = ext->tdata2;
+        break;
+    case CSR_TDATA3: /* CSR_TEXTRA32 (RV32), or CSR_TEXTRA64 (RV64) */
+        csr = ext->tdata3;
+        break;
+    case CSR_TINFO:
+        // csr = ext->tinfo;
+        csr = 1; /* does not exist */
+        break;
+    case CSR_TCONTROL:
+        csr = ext->tcontrol;
+        break;
+    case CSR_MCONTEXT:
+        csr = ext->mcontext;
+        break;
+    case CSR_SCONTEXT:
+        csr = ext->scontext;
+        break;
     default:
         csr = 0xdeadbeef;
         if (next) {
@@ -373,6 +416,30 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
     case CSR_UCCTLCOMMAND:
         do_cctl_command(env, value, PRV_U);
         ext->ucctlcommand = value;
+        break;
+    case CSR_TSELECT:
+        // ext->tselect = value;
+        break;
+    case CSR_TDATA1: /* CSR_MCONTROL, CSR_ICOUNT, CSR_ITRIGGER, or CSR_ETRIGGER */
+        ext->tdata1 = value;
+        break;
+    case CSR_TDATA2:
+        ext->tdata2 = value;
+        break;
+    case CSR_TDATA3: /* CSR_TEXTRA32 (RV32), or CSR_TEXTRA64 (RV64) */
+        ext->tdata3 = value;
+        break;
+    case CSR_TINFO:
+        // ext->tinfo = value;
+        break;
+    case CSR_TCONTROL:
+        ext->tcontrol = value;
+        break;
+    case CSR_MCONTEXT:
+        ext->mcontext = value;
+        break;
+    case CSR_SCONTEXT:
+        ext->scontext = value;
         break;
     default:
         if (next) {
