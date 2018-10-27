@@ -520,7 +520,7 @@ static void andes_ae350_machine_class_init_cb_instance_init(Object *obj)
 
 static void andes_ae350_machine_class_init_cb(MachineClass *mc)
 {
-    mc->desc = "RISC-V Board compatible with AE350 Platform";
+    mc->desc = "RISC-V Board compatible with Andes AE350 Platform";
     mc->init = andes_ae350_machine_init;
     mc->max_cpus = 4;
     mc->default_cpus = 2;
