@@ -879,7 +879,7 @@ atfmac100_write(void *opaque, hwaddr addr,
         s->xpcnt = value;
         break;
     default:
-        qemu_log_mask(LOG_GUEST_ERROR, "%s: Bad addr %p\n", __func__, (void*)addr);
+        qemu_log_mask(LOG_GUEST_ERROR, "%s: Bad addr %lx\n", __func__, (long)addr);
     }
 }
 
