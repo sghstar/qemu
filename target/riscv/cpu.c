@@ -158,7 +158,25 @@ static void rv32gcsux_andes_a25_priv1_10_0_cpu_init(Object *obj)
 #ifndef CONFIG_USER_ONLY
     env->mstatus = (0x3 << 11); /* MPP=M */
 #endif
-    ext->mmsc_cfg = 0x00003008u; /* EV5PE, VPLIC, ECD */
+    ext->micm_cfg = \
+        (0u << MMSC_CFG_ISET) |         /* 64 sets */
+        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_ILCK) |         /* no locking support */
+        0;
+    ext->mdcm_cfg = \
+        (0u << MMSC_CFG_DSET) |         /* 64 sets */
+        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_DLCK) |         /* no locking support */
+        0;
+    ext->mmsc_cfg = \
+        (1u << MMSC_CFG_ECD) |
+        (1u << MMSC_CFG_VPLIC) |
+        (1u << MMSC_CFG_EV5PE) |
+        (1u << MMSC_CFG_CCTLCSR) |
+        (1u << MMSC_CFG_EFHW) |
+        0;
 
     andes_riscv_csrif_init(env);
     andes_riscv_isaif_init(env);
@@ -176,7 +194,25 @@ static void rv32gcsux_andes_priv1_10_0_cpu_init(Object *obj)
 #ifndef CONFIG_USER_ONLY
     env->mstatus = (0x3 << 11); /* MPP=M */
 #endif
-    ext->mmsc_cfg = 0x00003008u; /* EV5PE, VPLIC, ECD */
+    ext->micm_cfg = \
+        (0u << MMSC_CFG_ISET) |         /* 64 sets */
+        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_ILCK) |         /* no locking support */
+        0;
+    ext->mdcm_cfg = \
+        (0u << MMSC_CFG_DSET) |         /* 64 sets */
+        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_DLCK) |         /* no locking support */
+        0;
+    ext->mmsc_cfg = \
+        (1u << MMSC_CFG_ECD) |
+        (1u << MMSC_CFG_VPLIC) |
+        (1u << MMSC_CFG_EV5PE) |
+        (1u << MMSC_CFG_CCTLCSR) |
+        (1u << MMSC_CFG_EFHW) |
+        0;
 
     andes_riscv_csrif_init(env);
     andes_riscv_isaif_init(env);
@@ -223,7 +259,25 @@ static void rv64gcsux_andes_ax25_priv1_10_0_cpu_init(Object *obj)
 #ifndef CONFIG_USER_ONLY
     env->mstatus = (0x3 << 11); /* MPP=M */
 #endif
-    ext->mmsc_cfg = 0x00003008u; /* EV5PE, VPLIC, ECD */
+    ext->micm_cfg = \
+        (0u << MMSC_CFG_ISET) |         /* 64 sets */
+        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_ILCK) |         /* no locking support */
+        0;
+    ext->mdcm_cfg = \
+        (0u << MMSC_CFG_DSET) |         /* 64 sets */
+        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_DLCK) |         /* no locking support */
+        0;
+    ext->mmsc_cfg = \
+        (1u << MMSC_CFG_ECD) |
+        (1u << MMSC_CFG_VPLIC) |
+        (1u << MMSC_CFG_EV5PE) |
+        (1u << MMSC_CFG_CCTLCSR) |
+        (1u << MMSC_CFG_EFHW) |
+        0;
 
     andes_riscv_csrif_init(env);
     andes_riscv_isaif_init(env);
@@ -241,7 +295,25 @@ static void rv64gcsux_andes_priv1_10_0_cpu_init(Object *obj)
 #ifndef CONFIG_USER_ONLY
     env->mstatus = (0x3 << 11); /* MPP=M */
 #endif
-    ext->mmsc_cfg = 0x00003008u; /* EV5PE, VPLIC, ECD */
+    ext->micm_cfg = \
+        (0u << MMSC_CFG_ISET) |         /* 64 sets */
+        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_ILCK) |         /* no locking support */
+        0;
+    ext->mdcm_cfg = \
+        (0u << MMSC_CFG_DSET) |         /* 64 sets */
+        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
+        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
+        (0u << MMSC_CFG_DLCK) |         /* no locking support */
+        0;
+    ext->mmsc_cfg = \
+        (1u << MMSC_CFG_ECD) |
+        (1u << MMSC_CFG_VPLIC) |
+        (1u << MMSC_CFG_EV5PE) |
+        (1u << MMSC_CFG_CCTLCSR) |
+        (1u << MMSC_CFG_EFHW) |
+        0;
 
     andes_riscv_csrif_init(env);
     andes_riscv_isaif_init(env);
