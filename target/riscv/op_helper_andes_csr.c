@@ -16,6 +16,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define DEBUG_ANDES_CSR
 #define OK (0)
 #define NG (1)
 
@@ -270,22 +271,46 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         csr = ext->uitb;
         break;
     case CSR_MCCTLBEGINADDR:
-        csr = ext->mcctlbeginaddr;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            csr = ext->mcctlbeginaddr;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_MCCTLCOMMAND:
-        csr = ext->mcctlcommand;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            csr = ext->mcctlcommand;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_MCCTLDATA:
-        csr = ext->mcctldata;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            csr = ext->mcctldata;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_SCCTLDATA:
-        csr = ext->scctldata;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVS)) {
+            csr = ext->scctldata;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_UCCTLBEGINADDR:
-        csr = ext->ucctlbeginaddr;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVU)) {
+            csr = ext->ucctlbeginaddr;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_UCCTLCOMMAND:
-        csr = ext->ucctlcommand;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVU)) {
+            csr = ext->ucctlcommand;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_TSELECT:
         csr = ext->tselect;
@@ -313,13 +338,21 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         csr = ext->scontext;
         break;
     default:
-        csr = 0xdeadbeef;
-        if (next) {
-            *next = NG;
-        }
+        cont = 1;
     }
 
-    if (next && !*next) qemu_log("%s: CSR %03lx V %08lx\n", __func__, (long)csrno, (long)csr);
+    if (next) {
+        *next = cont ? NG : OK;
+    }
+
+#ifdef DEBUG_ANDES_CSR
+    if (cont) {
+        csr = 0xdeadbeef; /* debug only! */
+    } else {
+        qemu_log("== %s: CSR %03lx V %08lx ==\n", __func__, (long)csrno, (long)csr);
+    }
+#endif
+
     return csr;
 }
 
@@ -398,24 +431,48 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
         ext->uitb = (ext->uitb & 0x1) | (value & ~0x3);
         break;
     case CSR_MCCTLBEGINADDR:
-        ext->mcctlbeginaddr = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            ext->mcctlbeginaddr = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_MCCTLCOMMAND:
-        do_cctl_command(env, value, PRV_M);
-        ext->mcctlcommand = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            do_cctl_command(env, value, PRV_M);
+            ext->mcctlcommand = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_MCCTLDATA:
-        ext->mcctldata = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR)) {
+            ext->mcctldata = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_SCCTLDATA:
-        ext->scctldata = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVS)) {
+            ext->scctldata = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_UCCTLBEGINADDR:
-        ext->ucctlbeginaddr = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVU)) {
+            ext->ucctlbeginaddr = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_UCCTLCOMMAND:
-        do_cctl_command(env, value, PRV_U);
-        ext->ucctlcommand = value;
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_CCTLCSR) && riscv_has_ext(env, RVU)) {
+            do_cctl_command(env, value, PRV_U);
+            ext->ucctlcommand = value;
+        } else {
+            cont = 1;
+        }
         break;
     case CSR_TSELECT:
         // ext->tselect = value;
@@ -442,12 +499,18 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
         ext->scontext = value;
         break;
     default:
-        if (next) {
-            *next = NG;
-        }
+        cont = 1;
     }
 
-    if (next && !*next) qemu_log("%s: CSR %03lx V %08lx\n", __func__, (long)csrno, (long)value);
+    if (next) {
+        *next = cont ? NG : OK;
+    }
+
+#ifdef DEBUG_ANDES_CSR
+    if (!cont) {
+        qemu_log("== %s: CSR %03lx V %08lx ==\n", __func__, (long)csrno, (long)value);
+    }
+#endif
 }
 
 void andes_riscv_csrif_init(CPURISCVState *env)
