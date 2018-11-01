@@ -479,6 +479,16 @@ static int andes_v5_decode_RV32_64C(CPURISCVState *env, DisasContext *ctx)
     return next;
 }
 
+enum {
+    OPC_RISC_FLB   = OPC_RISC_FP_LOAD | (0x0 << 12),
+    OPC_RISC_FLH   = OPC_RISC_FP_LOAD | (0x1 << 12),
+};
+
+enum {
+    OPC_RISC_FSB   = OPC_RISC_FP_STORE | (0x0 << 12),
+    OPC_RISC_FSH   = OPC_RISC_FP_STORE | (0x1 << 12),
+};
+
 static int andes_v5_decode_RV32_64G(CPURISCVState *env, DisasContext *ctx)
 {
     int next = 0; /* done */
@@ -498,14 +508,30 @@ static int andes_v5_decode_RV32_64G(CPURISCVState *env, DisasContext *ctx)
         next = 1; /* unhandled */
         break;
     case OPC_RISC_FP_LOAD:
-        v0 = tcg_const_i32(ctx->opcode);
-        gen_helper_andes_v5_flhw(cpu_env, v0);
-        tcg_temp_free_i32(v0);
+        if (MASK_OP_FP_LOAD(ctx->opcode) == OPC_RISC_FLB) {
+            if (!(ctx->flags & TB_FLAGS_FP_ENABLE)) {
+                gen_exception_illegal(ctx);
+            } else {
+                v0 = tcg_const_i32(ctx->opcode);
+                gen_helper_andes_v5_flhw(cpu_env, v0);
+                tcg_temp_free_i32(v0);
+            }
+        } else {
+            next = 1;
+        }
         break;
     case OPC_RISC_FP_STORE:
-        v0 = tcg_const_i32(ctx->opcode);
-        gen_helper_andes_v5_fshw(cpu_env, v0);
-        tcg_temp_free_i32(v0);
+        if (MASK_OP_FP_STORE(ctx->opcode) == OPC_RISC_FSB) {
+            if (!(ctx->flags & TB_FLAGS_FP_ENABLE)) {
+                gen_exception_illegal(ctx);
+            } else {
+                v0 = tcg_const_i32(ctx->opcode);
+                gen_helper_andes_v5_fshw(cpu_env, v0);
+                tcg_temp_free_i32(v0);
+            }
+        } else {
+            next = 1;
+        }
         break;
     default:
         next = 1; /* unhandled */
