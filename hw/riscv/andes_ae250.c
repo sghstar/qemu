@@ -164,6 +164,7 @@ static void riscv_andes_ae250_soc_init(Object *obj)
 static void riscv_andes_ae250_soc_realize(DeviceState *dev, Error **errp)
 {
     const struct MemmapEntry *memmap = andes_ae250_memmap;
+    int i;
 
     AndesAe250SocState *s = ANDES_AE250_SOC(dev);
     MemoryRegion *sys_mem = get_system_memory();
@@ -179,9 +180,12 @@ static void riscv_andes_ae250_soc_realize(DeviceState *dev, Error **errp)
         ANDES_AE250_PLIC_ENABLE_BASE, ANDES_AE250_PLIC_ENABLE_STRIDE,
         ANDES_AE250_PLIC_CONTEXT_BASE, ANDES_AE250_PLIC_CONTEXT_STRIDE,
         memmap[ANDES_AE250_PLIC].size);
-    andes_plmt_create(memmap[ANDES_AE250_PLMT].base,
-                      memmap[ANDES_AE250_PLMT].size, smp_cpus, ANDES_TIME_BASE,
-                      ANDES_TIMECMP_BASE);
+
+    for (i = 0; i < smp_cpus; ++i) {
+        andes_plmt_create(memmap[ANDES_AE250_PLMT].base + memmap[ANDES_AE250_PLMT].size * i,
+            memmap[ANDES_AE250_PLMT].size, i);
+    }
+
     atcuart100_create(sys_mem, memmap[ANDES_AE250_UART1].base,
                       qdev_get_gpio_in(DEVICE(s->plic), ANDES_AE250_UART1_IRQ),
                       115200, serial_hd(1));
