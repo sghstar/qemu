@@ -427,9 +427,11 @@ static void andes_ae350_soc_realize(DeviceState *dev, Error **errp)
         memmap[ANDES_AE350_SWINT].size, MIP_MSIP, MIP_SSIP);
     splicsw = SIFIVE_PLIC(ds);
 
-    andes_plmt_create(memmap[ANDES_AE350_PLMT].base,
-                      memmap[ANDES_AE350_PLMT].size, smp_cpus, ANDES_TIME_BASE,
-                      ANDES_TIMECMP_BASE);
+    for (i = 0; i < smp_cpus; ++i) {
+        andes_plmt_create(memmap[ANDES_AE350_PLMT].base + memmap[ANDES_AE350_PLMT].size * i,
+            memmap[ANDES_AE350_PLMT].size, 1, ANDES_TIME_BASE,
+            ANDES_TIMECMP_BASE);
+    }
 
     atcuart100_create(system_memory, memmap[ANDES_AE350_UART1].base,
                         plic_gpios[ANDES_AE350_UART1_IRQ], 115200,
