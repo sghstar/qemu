@@ -155,7 +155,7 @@ static void create_fdt(AndesAe350BoardState *s, const struct MemmapEntry *memmap
 
     qemu_fdt_add_subnode(fdt, "/cpus");
     qemu_fdt_setprop_cell(fdt, "/cpus", "timebase-frequency",
-        SIFIVE_CLINT_TIMEBASE_FREQ);
+        ANDES_PLMT_TIMEBASE_FREQ);
     qemu_fdt_setprop_cell(fdt, "/cpus", "#size-cells", 0x0);
     qemu_fdt_setprop_cell(fdt, "/cpus", "#address-cells", 0x1);
 
@@ -429,8 +429,7 @@ static void andes_ae350_soc_realize(DeviceState *dev, Error **errp)
 
     for (i = 0; i < smp_cpus; ++i) {
         andes_plmt_create(memmap[ANDES_AE350_PLMT].base + memmap[ANDES_AE350_PLMT].size * i,
-            memmap[ANDES_AE350_PLMT].size, 1, ANDES_TIME_BASE,
-            ANDES_TIMECMP_BASE);
+            memmap[ANDES_AE350_PLMT].size, i);
     }
 
     atcuart100_create(system_memory, memmap[ANDES_AE350_UART1].base,
