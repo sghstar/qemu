@@ -54,6 +54,17 @@ struct CPURVAndesExt {
     target_ulong ucctlbeginaddr;
     target_ulong ucctlcommand;
 
+    /* counter related CSRs */
+    target_ulong mcounterwen;
+    target_ulong mcountermask_m;
+    target_ulong mcountermask_s;
+    target_ulong mcountermask_u;
+    target_ulong mcounterinten;
+    target_ulong mcounterovf;
+
+    target_ulong mhpmcounter[32];
+    target_ulong mhpmcounterh[32];
+
     /* trigger CSRs */
     target_ulong tselect;
     target_ulong tdata1;
@@ -63,6 +74,9 @@ struct CPURVAndesExt {
     target_ulong tcontrol;
     target_ulong mcontext;
     target_ulong scontext;
+
+    /* counter internals */
+    uint64_t hpmcounter_mark[32];
 };
 
 void andes_riscv_isaif_init(CPURISCVState *env);

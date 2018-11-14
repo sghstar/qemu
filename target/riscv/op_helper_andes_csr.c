@@ -17,8 +17,11 @@
  */
 
 #define DEBUG_ANDES_CSR
-#define OK (0)
-#define NG (1)
+#define OK      (0)
+#define NG      (1)
+#define NO      (0)
+#define YES     (1)
+#define EXCP    (2)
 
 enum andes_csr_name {
     /* V5 machine mode CSRs */
@@ -54,10 +57,16 @@ enum andes_csr_name {
     CSR_TEXTRA32 = CSR_TDATA3,
     CSR_TEXTRA64 = CSR_TDATA3,
 
-
     CSR_MCCTLBEGINADDR = 0x7cb,
     CSR_MCCTLCOMMAND   = 0x7cc,
     CSR_MCCTLDATA      = 0x7cd,
+
+    CSR_MCOUNTERWEN     = 0X7ce,
+    CSR_MCOUNTERMASK_M  = 0X7d1,
+    CSR_MCOUNTERMASK_S  = 0X7d2,
+    CSR_MCOUNTERMASK_U  = 0X7d3,
+    CSR_MCOUNTERINTEN   = 0X7cf,
+    CSR_MCOUNTEROVF     = 0X7d4,
 
     /* internal machine mode CSRs */
     CSR_MRANDESQ    = 0x7fc,
@@ -73,9 +82,12 @@ enum andes_csr_name {
     CSR_SCCTLDATA   = 0x9cd,
 
     /* user mode CSRs */
-    CSR_UITB        = 0x800,
-    CSR_UCCTLBEGINADDR = 0x80b,
-    CSR_UCCTLCOMMAND   = 0x80c,
+    CSR_UITB            = 0x800,
+    CSR_UCCTLBEGINADDR  = 0x80b,
+    CSR_UCCTLCOMMAND    = 0x80c,
+
+    /* misc */
+    CSR_MTIME           = 0xb01,
 };
 
 enum andes_cctl_command {
@@ -195,6 +207,13 @@ static int do_cctl_command(CPURISCVState *env, target_ulong cmd, int mode)
     return 0;
 }
 
+static inline target_ulong read_pmnds_csr(CPURISCVState *env, target_ulong csrno)
+{
+    CPURVAndesExt *ext = env->ext;
+    uint64_t counter = ext->mhpmcounter[csrno] | ((uint64_t)ext->mhpmcounterh[csrno] << 32);
+    return counter;
+}
+
 target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next)
 {
     CPURVAndesExt *ext = env->ext;
@@ -203,6 +222,40 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
     if (next) {
         *next = OK; /* presume */
     }
+
+    /* counter CSRs */
+#ifndef CONFIG_USER_ONLY
+    target_ulong ctr_en = env->priv == PRV_U ? env->scounteren :
+                          env->priv == PRV_S ? env->mcounteren : -1U;
+#else
+    target_ulong ctr_en = -1;
+#endif
+    target_ulong ctr_ok = (ctr_en >> (csrno & 31)) & 1;
+
+    if ((csrno >= CSR_HPMCOUNTER3 && csrno <= CSR_HPMCOUNTER31) && (ctr_ok)) {
+        return (csrno > CSR_HPMCOUNTER6) ? 0 : read_pmnds_csr(env, csrno - CSR_HPMCOUNTER3);
+    }
+#if defined(TARGET_RISCV32)
+    if ((csrno >= CSR_HPMCOUNTER3H && csrno <= CSR_HPMCOUNTER31H) && (ctr_ok)) {
+        return (csrno > CSR_HPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_HPMCOUNTER3H];
+    }
+#endif
+
+    if (csrno >= CSR_MHPMCOUNTER3 && csrno <= CSR_MHPMCOUNTER31) {
+        return (csrno > CSR_MHPMCOUNTER6) ? 0 : read_pmnds_csr(env, csrno - CSR_MHPMCOUNTER3);
+    }
+#if defined(TARGET_RISCV32)
+    if (csrno >= CSR_MHPMCOUNTER3H && csrno <= CSR_MHPMCOUNTER31H) {
+        return (csrno > CSR_MHPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_MHPMCOUNTER3H];
+    }
+#endif
+
+    if (csrno >= CSR_MHPMEVENT3 && csrno <= CSR_MHPMEVENT31) {
+        /* TODO: add event support */
+        return 0;
+    }
+
+    /* other CSRs */
     switch (csrno) {
     case CSR_MICM_CFG: /* MRO */
         csr = ext->micm_cfg;
@@ -312,6 +365,48 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
             cont = 1;
         }
         break;
+    case CSR_MCOUNTERWEN:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcounterwen;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_M:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcountermask_m;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_S:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcountermask_s;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_U:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcountermask_u;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERINTEN:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcounterinten;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTEROVF:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            csr = ext->mcounterovf;
+        } else {
+            cont = 1;
+        }
+        break;
     case CSR_TSELECT:
         csr = ext->tselect;
         break;
@@ -356,8 +451,90 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
     return csr;
 }
 
-void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target_ulong csrno, int *next)
+static inline void
+update_pmnds_interrupt(CPURISCVState *env)
 {
+#ifndef CONFIG_USER_ONLY
+    RISCVCPU *cpu = riscv_env_get_cpu(env);
+    CPURVAndesExt *ext = env->ext;
+    target_ulong irq = ext->mcounterovf & ext->mcounterinten;
+    int level = !!irq;
+    riscv_set_local_interrupt(cpu, MIP_PMOVI, level);
+#endif
+}
+
+static inline int
+write_pmnds_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
+{
+    int cont = NO;
+    CPURVAndesExt *ext = env->ext;
+
+#ifndef CONFIG_USER_ONLY
+    target_ulong ctr_en = env->priv == PRV_U ? env->scounteren :
+                          env->priv == PRV_S ? env->mcounteren : -1U;
+#else
+    target_ulong ctr_en = -1;
+#endif
+
+    target_ulong ctr_ok = (ctr_en >> (csrno & 31)) & 1;
+    ctr_ok &= (ext->mcounterwen >> (csrno & 31)) & 1;
+
+    do {
+        if ((csrno == CSR_TIME) || (csrno == CSR_MTIME)) {
+            cont = YES;
+            break;
+        }
+
+        if ((csrno >= CSR_CYCLE) && (csrno <= CSR_HPMCOUNTER31)) {
+            if (ctr_ok) {
+                ext->mhpmcounter[csrno - CSR_CYCLE] = value;
+            } else {
+                cont = EXCP;
+            }
+            break;
+        }
+#if defined(TARGET_RISCV32)
+        if ((csrno >= CSR_CYCLEH) && (csrno <= CSR_HPMCOUNTER31H)) {
+            if (ctr_ok) {
+                ext->mhpmcounterh[csrno - CSR_CYCLEH] = value;
+            } else {
+                cont = EXCP;
+            }
+            break;
+        }
+#endif
+
+        if ((csrno >= CSR_MCYCLE) && (csrno <= CSR_MHPMCOUNTER31)) {
+            ext->mhpmcounter[csrno - CSR_MCYCLE] = value;
+            break;
+        }
+#if defined(TARGET_RISCV32)
+        if ((csrno >= CSR_MCYCLEH) && (csrno <= CSR_MHPMCOUNTER31H)) {
+            ext->mhpmcounterh[csrno - CSR_MCYCLEH] = value;
+            break;
+        }
+#endif
+
+        if ((csrno >= CSR_MHPMEVENT3) && (csrno <= CSR_MHPMEVENT31)) {
+            /* NOP now, TODO: add event support */
+            break;
+        }
+
+        cont = YES;
+    } while (0);
+
+    if (cont == EXCP) {
+        cont = NO;
+        do_raise_exception_err(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
+    }
+
+    return cont;
+}
+
+static inline int
+write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
+{
+    int cont = NO;
     CPURVAndesExt *ext = env->ext;
 
     if (next) {
@@ -474,6 +651,50 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
             cont = 1;
         }
         break;
+    case CSR_MCOUNTERWEN:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcounterwen = value;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_M:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcountermask_m = value;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_S:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcountermask_s = value;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERMASK_U:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcountermask_u = value;
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTERINTEN:
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcounterinten = value;
+            update_pmnds_interrupt(env);
+        } else {
+            cont = 1;
+        }
+        break;
+    case CSR_MCOUNTEROVF: /* W1C */
+        if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
+            ext->mcounterovf &= ~value;
+            update_pmnds_interrupt(env);
+        } else {
+            cont = 1;
+        }
+        break;
     case CSR_TSELECT:
         // ext->tselect = value;
         break;
@@ -499,7 +720,23 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
         ext->scontext = value;
         break;
     default:
-        cont = 1;
+        cont = YES;
+    }
+
+    return cont;
+}
+
+void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target_ulong csrno, int *next)
+{
+    int cont = NO;
+    CPURVAndesExt *ext = env->ext;
+
+    if (extract32(ext->mmsc_cfg, MMSC_CFG_PMNDS, 1)) {
+        cont = write_pmnds_csr(env, value, csrno);
+    }
+    
+    if (cont) {
+        cont = write_other_csr(env, value, csrno);
     }
 
     if (next) {

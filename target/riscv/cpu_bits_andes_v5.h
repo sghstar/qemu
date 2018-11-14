@@ -1,5 +1,32 @@
 /* Andes RISC-V V5 ISA Extension constants */
 
+enum csr_mie_t {
+    MIE_USIE       = 0,
+    MIE_SSIE       = 1,
+    MIE_MSIE       = 3,
+    MIE_UTIE       = 4,
+    MIE_STIE       = 5,
+    MIE_MTIE       = 7,
+    MIE_UEIE       = 8,
+    MIE_SEIE       = 9,
+    MIE_MEIE       = 11,
+    MIE_IMECCI     = 16,
+    MIE_BWEI       = 17,
+    MIE_PMOVI      = 18,
+};
+
+#define MIP_IMECCI  (1 << MIE_IMECCI)
+#define MIP_BWEI    (1 << MIE_BWEI)
+#define MIP_PMOVI   (1 << MIE_PMOVI)
+
+/* xSIE:        software interrupt
+ * xTIE:        timer interrupt
+ * xEIE:        external interrupt
+ * IMECCI:      imprecise parity/ECC error interrupt
+ * BWEI:        bus write transaction error interrupt
+ * PMOVE:       performance counter interrupt
+ */
+
 enum csr_micm_cfg_t {
     MMSC_CFG_ISET       = 0,
     MMSC_CFG_IWAY       = 3,
@@ -59,6 +86,7 @@ enum csr_mmsc_cfg_t {
     MMSC_CFG_PMNDS      = 15,
     MMSC_CFG_CCTLCSR    = 16,
     MMSC_CFG_EFHW       = 17,
+    MMSC_CFG_VCCTL      = 18,
 };
 
 /* ECC:     global parity support
@@ -73,6 +101,7 @@ enum csr_mmsc_cfg_t {
  * PMNDS:   Andes-enhanced performance monitoring support
  * CCTLCSR: CCTL CSRs support
  * EFHW:    FLHW/FSHW instruction support
+ * VCCTL:   CCTL version
  */
 
 enum csr_mmisc_ctl_t {

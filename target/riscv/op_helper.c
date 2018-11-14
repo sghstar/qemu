@@ -393,6 +393,17 @@ void csr_write_helper(CPURISCVState *env, target_ulong val_to_write,
  */
 target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno)
 {
+    /* CSR extension interface hook
+     * TODO: use CSR I/F instead
+     */
+    if (env->csrif.csr_read_helper != riscv_csr_read_helper) {
+        int next = 0;
+        target_ulong csr = env->csrif.csr_read_helper(env, csrno, &next);
+        if (!next) {
+            return csr;
+        }
+    }
+
 #ifndef CONFIG_USER_ONLY
     target_ulong ctr_en = env->priv == PRV_U ? env->scounteren :
                           env->priv == PRV_S ? env->mcounteren : -1U;
@@ -417,23 +428,12 @@ target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno)
         return 0;
     }
 #if defined(TARGET_RISCV32)
-    if (csrno >= CSR_MHPMCOUNTER3 && csrno <= CSR_MHPMCOUNTER31) {
+    if (csrno >= CSR_MHPMCOUNTER3H && csrno <= CSR_MHPMCOUNTER31H) {
         return 0;
     }
 #endif
     if (csrno >= CSR_MHPMEVENT3 && csrno <= CSR_MHPMEVENT31) {
         return 0;
-    }
-
-    /* CSR extension interface hook
-     * TODO: use CSR I/F instead
-     */
-    if (env->csrif.csr_read_helper != riscv_csr_read_helper) {
-        int next = 0;
-        target_ulong csr = env->csrif.csr_read_helper(env, csrno, &next);
-        if (!next) {
-            return csr;
-        }
     }
 
     switch (csrno) {
