@@ -54,6 +54,11 @@ struct CPURVAndesExt {
     target_ulong ucctlbeginaddr;
     target_ulong ucctlcommand;
 
+    /* local interrupt CSRs */
+    target_ulong mslideleg;
+    target_ulong slie;
+    target_ulong slip;
+
     /* counter related CSRs */
     target_ulong mcounterwen;
     target_ulong mcountermask_m;
@@ -64,6 +69,7 @@ struct CPURVAndesExt {
 
     target_ulong mhpmcounter[32];
     target_ulong mhpmcounterh[32];
+    target_ulong mhpmevent[32];
 
     /* trigger CSRs */
     target_ulong tselect;
