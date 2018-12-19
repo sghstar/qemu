@@ -145,79 +145,6 @@ static void rv32imacu_nommu_cpu_init(Object *obj)
     set_resetvec(env, DEFAULT_RSTVEC);
 }
 
-static void rv32gcsux_andes_a25_priv1_10_0_cpu_init(Object *obj)
-{
-    CPURISCVState *env = &RISCV_CPU(obj)->env;
-    set_misa(env, RV32 | RVI | RVM | RVA | RVF | RVD | RVC | RVS | RVU | RVX);
-    set_versions(env, USER_VERSION_2_02_0, PRIV_VERSION_1_10_0);
-    set_resetvec(env, ANDES_A25_DEFAULT_RSTVEC);
-    set_feature(env, RISCV_FEATURE_MMU);
-
-    CPURVAndesExt *ext = g_new0(CPURVAndesExt, 1);
-    env->ext = ext;
-#ifndef CONFIG_USER_ONLY
-    env->mstatus = (0x3 << 11); /* MPP=M */
-#endif
-    ext->micm_cfg = \
-        (0u << MMSC_CFG_ISET) |         /* 64 sets */
-        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_ILCK) |         /* no locking support */
-        0;
-    ext->mdcm_cfg = \
-        (0u << MMSC_CFG_DSET) |         /* 64 sets */
-        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_DLCK) |         /* no locking support */
-        0;
-    ext->mmsc_cfg = \
-        (1u << MMSC_CFG_ECD) |
-        (1u << MMSC_CFG_VPLIC) |
-        (1u << MMSC_CFG_EV5PE) |
-        (1u << MMSC_CFG_CCTLCSR) |
-        (1u << MMSC_CFG_EFHW) |
-        0;
-
-    andes_riscv_csrif_init(env);
-    andes_riscv_isaif_init(env);
-}
-
-static void rv32gcsux_andes_priv1_10_0_cpu_init(Object *obj)
-{
-    CPURISCVState *env = &RISCV_CPU(obj)->env;
-    set_misa(env, RV32 | RVI | RVM | RVA | RVF | RVD | RVC | RVS | RVU | RVX);
-    set_versions(env, USER_VERSION_2_02_0, PRIV_VERSION_1_10_0);
-    set_resetvec(env, ANDES_N25_DEFAULT_RSTVEC);
-
-    CPURVAndesExt *ext = g_new0(CPURVAndesExt, 1);
-    env->ext = ext;
-#ifndef CONFIG_USER_ONLY
-    env->mstatus = (0x3 << 11); /* MPP=M */
-#endif
-    ext->micm_cfg = \
-        (0u << MMSC_CFG_ISET) |         /* 64 sets */
-        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_ILCK) |         /* no locking support */
-        0;
-    ext->mdcm_cfg = \
-        (0u << MMSC_CFG_DSET) |         /* 64 sets */
-        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_DLCK) |         /* no locking support */
-        0;
-    ext->mmsc_cfg = \
-        (1u << MMSC_CFG_ECD) |
-        (1u << MMSC_CFG_VPLIC) |
-        (1u << MMSC_CFG_EV5PE) |
-        (1u << MMSC_CFG_CCTLCSR) |
-        (1u << MMSC_CFG_EFHW) |
-        0;
-
-    andes_riscv_csrif_init(env);
-    andes_riscv_isaif_init(env);
-}
-
 #elif defined(TARGET_RISCV64)
 
 static void rv64gcsu_priv1_09_1_cpu_init(Object *obj)
@@ -246,80 +173,9 @@ static void rv64imacu_nommu_cpu_init(Object *obj)
     set_resetvec(env, DEFAULT_RSTVEC);
 }
 
-static void rv64gcsux_andes_ax25_priv1_10_0_cpu_init(Object *obj)
-{
-    CPURISCVState *env = &RISCV_CPU(obj)->env;
-    set_misa(env, RV64 | RVI | RVM | RVA | RVF | RVD | RVC | RVS | RVU | RVX);
-    set_versions(env, USER_VERSION_2_02_0, PRIV_VERSION_1_10_0);
-    set_resetvec(env, ANDES_AX25_DEFAULT_RSTVEC);
-    set_feature(env, RISCV_FEATURE_MMU);
-
-    CPURVAndesExt *ext = g_new0(CPURVAndesExt, 1);
-    env->ext = ext;
-#ifndef CONFIG_USER_ONLY
-    env->mstatus = (0x3 << 11); /* MPP=M */
 #endif
-    ext->micm_cfg = \
-        (0u << MMSC_CFG_ISET) |         /* 64 sets */
-        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_ILCK) |         /* no locking support */
-        0;
-    ext->mdcm_cfg = \
-        (0u << MMSC_CFG_DSET) |         /* 64 sets */
-        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_DLCK) |         /* no locking support */
-        0;
-    ext->mmsc_cfg = \
-        (1u << MMSC_CFG_ECD) |
-        (1u << MMSC_CFG_VPLIC) |
-        (1u << MMSC_CFG_EV5PE) |
-        (1u << MMSC_CFG_CCTLCSR) |
-        (1u << MMSC_CFG_EFHW) |
-        0;
 
-    andes_riscv_csrif_init(env);
-    andes_riscv_isaif_init(env);
-}
-
-static void rv64gcsux_andes_priv1_10_0_cpu_init(Object *obj)
-{
-    CPURISCVState *env = &RISCV_CPU(obj)->env;
-    set_misa(env, RV64 | RVI | RVM | RVA | RVF | RVD | RVC | RVS | RVU | RVX);
-    set_versions(env, USER_VERSION_2_02_0, PRIV_VERSION_1_10_0);
-    set_resetvec(env, ANDES_NX25_DEFAULT_RSTVEC);
-
-    CPURVAndesExt *ext = g_new0(CPURVAndesExt, 1);
-    env->ext = ext;
-#ifndef CONFIG_USER_ONLY
-    env->mstatus = (0x3 << 11); /* MPP=M */
-#endif
-    ext->micm_cfg = \
-        (0u << MMSC_CFG_ISET) |         /* 64 sets */
-        (3u << MMSC_CFG_IWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_ISZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_ILCK) |         /* no locking support */
-        0;
-    ext->mdcm_cfg = \
-        (0u << MMSC_CFG_DSET) |         /* 64 sets */
-        (3u << MMSC_CFG_DWAY) |         /*  4 ways */
-        (3u << MMSC_CFG_DSZ) |          /* 32 bytes per line */
-        (0u << MMSC_CFG_DLCK) |         /* no locking support */
-        0;
-    ext->mmsc_cfg = \
-        (1u << MMSC_CFG_ECD) |
-        (1u << MMSC_CFG_VPLIC) |
-        (1u << MMSC_CFG_EV5PE) |
-        (1u << MMSC_CFG_CCTLCSR) |
-        (1u << MMSC_CFG_EFHW) |
-        0;
-
-    andes_riscv_csrif_init(env);
-    andes_riscv_isaif_init(env);
-}
-
-#endif
+#include "cpu_andes.c"
 
 static ObjectClass *riscv_cpu_class_by_name(const char *cpu_model)
 {
