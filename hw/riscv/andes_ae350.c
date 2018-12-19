@@ -402,7 +402,7 @@ static void andes_ae350_soc_realize(DeviceState *dev, Error **errp)
 
     /* MMIO */
     /* PLIC */
-    printf("%s: plic_targets '%s'\n", __func__, ms->plic_targets);
+    /* printf("%s: plic_targets '%s'\n", __func__, ms->plic_targets); */
     s->plic = andes_plic_create(
         memmap[ANDES_AE350_PLIC].base, ms->plic_targets,
         ANDES_AE350_PLIC_NUM_SOURCES, ANDES_AE350_PLIC_NUM_PRIORITIES,
@@ -417,7 +417,7 @@ static void andes_ae350_soc_realize(DeviceState *dev, Error **errp)
     }
 
     /* SWINT */
-    printf("%s: plicsw_targets '%s'\n", __func__, ms->plicsw_targets);
+    /* printf("%s: plicsw_targets '%s'\n", __func__, ms->plicsw_targets); */
     ds = andes_plic_swint_create(
         memmap[ANDES_AE350_SWINT].base, ms->plicsw_targets,
         ANDES_AE350_PLICSW_NUM_SOURCES, ANDES_AE350_PLICSW_NUM_PRIORITIES,
