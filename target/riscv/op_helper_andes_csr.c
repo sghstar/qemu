@@ -16,7 +16,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define DEBUG_ANDES_CSR
+/* #define DEBUG_ANDES_CSR */
 #define OK      (0)
 #define NG      (1)
 #define NO      (0)
@@ -80,9 +80,13 @@ enum andes_csr_name {
     CSR_DDCAUSE     = 0x7e1,
 
     /* supervisor mode CSRs */
-    CSR_SLIE        = 0x9c4,
-    CSR_SLIP        = 0x9c5,
-    CSR_SCCTLDATA   = 0x9cd,
+    CSR_SLIE            = 0x9c4,
+    CSR_SLIP            = 0x9c5,
+    CSR_SCCTLDATA       = 0x9cd,
+    CSR_SCOUNTERINTEN   = 0X9cf,
+    CSR_SCOUNTERMASK_S  = 0X9d2,
+    CSR_SCOUNTERMASK_U  = 0X9d3,
+    CSR_SCOUNTEROVF     = 0X9d4,
 
     /* user mode CSRs */
     CSR_UITB            = 0x800,
@@ -90,7 +94,12 @@ enum andes_csr_name {
     CSR_UCCTLCOMMAND    = 0x80c,
 
     /* misc */
+    CSR_MHPMEVENT0      = 0x320,
+    CSR_MHPMCOUNTER0    = 0xb00,
+    CSR_MHPMCOUNTER0H   = 0xb80,
     CSR_MTIME           = 0xb01,
+    CSR_HPMCOUNTER0     = 0xc00,
+    CSR_HPMCOUNTER0H    = 0xc80,
 };
 
 enum andes_cctl_command {
@@ -226,11 +235,47 @@ static int do_cctl_command(CPURISCVState *env, target_ulong cmd, int mode)
     return 0;
 }
 
+#if 0
 static inline target_ulong read_pmnds_csr(CPURISCVState *env, target_ulong csrno)
 {
+    int counteridx = csrno - CSR_HPMCOUNTER0;
     CPURVAndesExt *ext = env->ext;
-    uint64_t counter = ext->mhpmcounter[csrno] | ((uint64_t)ext->mhpmcounterh[csrno] << 32);
+#if defined(TARGET_RISCV32)
+    uint64_t counter = ext->mhpmcounter[counteridx] | ((uint64_t)ext->mhpmcounterh[counteridx] << 32);
+#else
+    uint64_t counter = ext->mhpmcounter[counteridx];
+#endif
     return counter;
+}
+
+static inline target_ulong read_pmnds_csr_mode(CPURISCVState *env, target_ulong csrno)
+{
+    int counteridx = csrno - CSR_MHPMCOUNTER0;
+    CPURVAndesExt *ext = env->ext;
+#if defined(TARGET_RISCV32)
+    uint64_t counter = ext->mhpmcounter[counteridx] | ((uint64_t)ext->mhpmcounterh[counteridx] << 32);
+#else
+    uint64_t counter = ext->mhpmcounter[counteridx];
+#endif
+    return counter;
+}
+#endif
+
+static void andes_riscv_csr_validate_helper(CPURISCVState *env, uint64_t which,
+                                            uint64_t write, uintptr_t ra, int *next)
+{
+#ifndef CONFIG_USER_ONLY
+    CPURVAndesExt *ext = env->ext;
+    int is_handled = 0;
+    unsigned csr_priv = get_field((which), 0x300);
+    unsigned csr_read_only = get_field((which), 0xC00) == 3;
+    if (write && csr_read_only && ext->mcounterwen && (env->priv >= csr_priv)) {
+        if ((which >= CSR_CYCLE) && (which <= CSR_HPMCOUNTER31) && (env->priv >= (riscv_has_ext(env, RVS) ? PRV_S : PRV_U))) {
+            is_handled = (ext->mcounterwen >> (which & 0x1f)) & 1u;
+        }
+    }
+    *next = is_handled ? 0 : 1;
+#endif
 }
 
 target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next)
@@ -253,30 +298,35 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
     target_ulong ctr_ok = (ctr_en >> (csrno & 31)) & 1;
 
     if ((csrno >= CSR_HPMCOUNTER3 && csrno <= CSR_HPMCOUNTER31) && (ctr_ok)) {
-        return (csrno > CSR_HPMCOUNTER6) ? 0 : read_pmnds_csr(env, csrno - CSR_HPMCOUNTER3);
+        return (csrno > CSR_HPMCOUNTER6) ? 0 : ext->mhpmcounter[csrno - CSR_HPMCOUNTER0];
     }
 #if defined(TARGET_RISCV32)
     if ((csrno >= CSR_HPMCOUNTER3H && csrno <= CSR_HPMCOUNTER31H) && (ctr_ok)) {
-        return (csrno > CSR_HPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_HPMCOUNTER3H];
+        return (csrno > CSR_HPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_HPMCOUNTER0H];
     }
 #endif
 
     if (csrno >= CSR_MHPMCOUNTER3 && csrno <= CSR_MHPMCOUNTER31) {
-        return (csrno > CSR_MHPMCOUNTER6) ? 0 : read_pmnds_csr(env, csrno - CSR_MHPMCOUNTER3);
+        return (csrno > CSR_MHPMCOUNTER6) ? 0 : ext->mhpmcounter[csrno - CSR_MHPMCOUNTER0];
     }
 #if defined(TARGET_RISCV32)
     if (csrno >= CSR_MHPMCOUNTER3H && csrno <= CSR_MHPMCOUNTER31H) {
-        return (csrno > CSR_MHPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_MHPMCOUNTER3H];
+        return (csrno > CSR_MHPMCOUNTER6H) ? 0 : ext->mhpmcounterh[csrno - CSR_MHPMCOUNTER0H];
     }
 #endif
 
     if (csrno >= CSR_MHPMEVENT3 && csrno <= CSR_MHPMEVENT31) {
-        return ext->mhpmevent[csrno - CSR_MHPMEVENT3];
-        return 0;
+        return ext->mhpmevent[csrno - CSR_MHPMEVENT0];
     }
 
     /* other CSRs */
     switch (csrno) {
+#if 0
+    case CSR_CYCLE:
+    case CSR_INSTRET:
+        cont = YES;
+        break;
+#endif
     case CSR_MICM_CFG: /* MRO */
         csr = ext->micm_cfg;
         break;
@@ -400,6 +450,7 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         }
         break;
     case CSR_MCOUNTERMASK_S:
+    case CSR_SCOUNTERMASK_S:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             csr = ext->mcountermask_s;
         } else {
@@ -407,6 +458,7 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         }
         break;
     case CSR_MCOUNTERMASK_U:
+    case CSR_SCOUNTERMASK_U:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             csr = ext->mcountermask_u;
         } else {
@@ -414,6 +466,7 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         }
         break;
     case CSR_MCOUNTERINTEN:
+    case CSR_SCOUNTERINTEN:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             csr = ext->mcounterinten;
         } else {
@@ -421,6 +474,7 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         }
         break;
     case CSR_MCOUNTEROVF:
+    case CSR_SCOUNTEROVF:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             csr = ext->mcounterovf;
         } else {
@@ -462,16 +516,20 @@ target_ulong andes_riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno,
         break;
     case CSR_SLIE:
         if (riscv_has_ext(env, RVS)) {
-            const target_ulong mask = (7u << 16);
+#ifndef CONFIG_USER_ONLY
+            target_ulong mask = (env->priv == PRV_M) ? (7u << 16) : ext->mslideleg;
             csr = ext->slie & mask;
+#endif
         } else {
             cont = YES;
         }
         break;
     case CSR_SLIP:
         if (riscv_has_ext(env, RVS)) {
-            const target_ulong mask = (7u << 16);
+#ifndef CONFIG_USER_ONLY
+            target_ulong mask = (env->priv == PRV_M) ? (7u << 16) : ext->mslideleg;
             csr = ext->slip & mask;
+#endif
         } else {
             cont = YES;
         }
@@ -516,24 +574,29 @@ static int activated_event_count = 0;
 
 static inline uint64_t get_pmnds_counter(CPURVAndesExt* ext, int index)
 {
-    uint64_t counter = ext->mhpmcounter[index];
 #if defined(TARGET_RISCV32)
+    uint64_t counter = ext->mhpmcounter[index];
     counter |= ((uint64_t)ext->mhpmcounterh[index] << 32);
+#else
+    uint64_t counter = ext->mhpmcounter[index];
 #endif
     return counter;
 }
 
 static inline void set_pmnds_counter(CPURVAndesExt* ext, int index, uint64_t counter)
 {
-    ext->mhpmcounter[index] = counter;
 #if defined(TARGET_RISCV32)
+    ext->mhpmcounter[index] = (target_ulong)counter;
     ext->mhpmcounterh[index] = counter >> 32;
+#else
+    ext->mhpmcounter[index] = counter;
 #endif
 }
 
 #ifndef CONFIG_USER_ONLY
 static void pmnds_timer_cb(void *opaque)
 {
+    // printf("%s:\n", __func__);
     CPURISCVState* env = opaque;
     CPURVAndesExt* ext = env->ext;
     int i, is_ov = 0;
@@ -548,13 +611,22 @@ static void pmnds_timer_cb(void *opaque)
         if (i == 1) { continue; } /* skip MTIME */
         if ((i < 3) || (ext->mhpmevent[i])) {
             uint64_t delta, counter, next;
-            uint32_t div, mask;
+            uint32_t ratio, mask;
             if (klock > ext->hpmcounter_mark[i]) {
                 delta = klock - ext->hpmcounter_mark[i];
             } else {
                 /* wrap */
                 delta = klock + ~ext->hpmcounter_mark[i] + 1;
             }
+
+            /* counter mask simulation */
+            ratio = 100;
+            mask = (1u << i);
+            if (ext->mcountermask_m & mask) { ratio -= 1; }
+            if (ext->mcountermask_s & mask) { ratio -= 19; }
+            if (ext->mcountermask_u & mask) { ratio -= 80; }
+            delta = delta * ratio / 100;
+
             counter = get_pmnds_counter(ext, i);
             next = counter + delta;
             if (next > counter) {
@@ -566,14 +638,6 @@ static void pmnds_timer_cb(void *opaque)
                 ++is_ov;
             }
             ext->hpmcounter_mark[i] = klock;
-
-            /* counter mask simulation */
-            div = 1;
-            mask = (1u << i);
-            if (ext->mcountermask_m & mask) { ++div; }
-            if (ext->mcountermask_s & mask) { ++div; }
-            if (ext->mcountermask_u & mask) { ++div; }
-            counter /= div;
 
             set_pmnds_counter(ext, i, counter);
         }
@@ -589,9 +653,11 @@ static inline void
 update_pmnds_event(CPURISCVState *env, target_ulong value, target_ulong csrno)
 {
 #ifndef CONFIG_USER_ONLY
+    int eventidx = csrno - CSR_MHPMEVENT0;
+    // printf("%s: eventidx %d = 0x%08lx\n", __func__, eventidx, (long)value);
     CPURVAndesExt* ext = env->ext;
-    target_ulong previous = ext->mhpmevent[csrno - CSR_MHPMEVENT3];
-    ext->mhpmevent[csrno - CSR_MHPMEVENT3] = value;
+    target_ulong previous = ext->mhpmevent[eventidx];
+    ext->mhpmevent[eventidx] = value;
     int inc = 0;
     /* the simulation is simpplified as following:
      *   # the count will update on next 'tick' ignoring the imprecise
@@ -700,7 +766,18 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
     if (next) {
         *next = OK; /* presume */
     }
+#ifndef CONFIG_USER_ONLY
+    uint64_t delegable_ints = MIP_SSIP | MIP_STIP | MIP_SEIP;
+    uint64_t all_ints = delegable_ints | MIP_MSIP | MIP_MTIP | MIP_MEIP | MIP_PMOVI;
+#endif
+
     switch (csrno) {
+#ifndef CONFIG_USER_ONLY
+    case CSR_MIE: {
+        env->mie = (env->mie & ~all_ints) | (value & all_ints);
+        break;
+    }
+#endif
     case CSR_MICM_CFG: /* MRO */
     case CSR_MDCM_CFG: /* MRO */
     case CSR_MMSC_CFG: /* MRO */
@@ -825,6 +902,9 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
             cont = YES;
         }
         break;
+    case CSR_SCOUNTERMASK_S:
+        value = (ext->mcountermask_s & ~ext->mcounterwen) | (value & ext->mcounterwen);
+        /* fall through */
     case CSR_MCOUNTERMASK_S:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             ext->mcountermask_s = value;
@@ -832,6 +912,9 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
             cont = YES;
         }
         break;
+    case CSR_SCOUNTERMASK_U:
+        value = (ext->mcountermask_u & ~ext->mcounterwen) | (value & ext->mcounterwen);
+        /* fall through */
     case CSR_MCOUNTERMASK_U:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             ext->mcountermask_u = value;
@@ -839,6 +922,9 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
             cont = YES;
         }
         break;
+    case CSR_SCOUNTERINTEN:
+        value = (ext->mcounterinten & ~ext->mcounterwen) | (value & ext->mcounterwen);
+        /* fall through */
     case CSR_MCOUNTERINTEN:
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             ext->mcounterinten = value;
@@ -847,6 +933,9 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
             cont = YES;
         }
         break;
+    case CSR_SCOUNTEROVF:
+        value &= ext->mcounterwen;
+        /* fall through */
     case CSR_MCOUNTEROVF: /* W1C */
         if (ext->mmsc_cfg & (1u << MMSC_CFG_PMNDS)) {
             ext->mcounterovf &= ~value;
@@ -889,16 +978,20 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
         break;
     case CSR_SLIE:
         if (riscv_has_ext(env, RVS)) {
-            const target_ulong mask = (7u << 16);
+#ifndef CONFIG_USER_ONLY
+            target_ulong mask = (env->priv == PRV_M) ? (7u << 16) : ext->mslideleg;
             ext->slie = (ext->slie & ~mask) | (value & mask);
+#endif
         } else {
             cont = YES;
         }
         break;
     case CSR_SLIP:
         if (riscv_has_ext(env, RVS)) {
-            const target_ulong mask = (7u << 16);
+#ifndef CONFIG_USER_ONLY
+            target_ulong mask = (env->priv == PRV_M) ? (7u << 16) : ext->mslideleg;
             ext->slip = (ext->slip & ~mask) | (value & mask);
+#endif
         } else {
             cont = YES;
         }
@@ -936,6 +1029,7 @@ void andes_riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target
 
 void andes_riscv_csrif_init(CPURISCVState *env)
 {
+    env->csrif.csr_validate_helper = andes_riscv_csr_validate_helper;
     env->csrif.csr_read_helper = andes_riscv_csr_read_helper;
     env->csrif.csr_write_helper = andes_riscv_csr_write_helper;
 }

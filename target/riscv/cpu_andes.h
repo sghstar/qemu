@@ -21,6 +21,9 @@
 
 #define ANDES_N25_DEFAULT_RSTVEC  (0x00000000u)
 
+#define ANDES_SLI       (16)
+#define ANDES_SLI_BIAS  (256)
+
 typedef struct CPURVAndesExt CPURVAndesExt;
 
 struct CPURVAndesExt {
@@ -86,5 +89,7 @@ struct CPURVAndesExt {
 };
 
 void andes_riscv_isaif_init(CPURISCVState *env);
+bool andes_riscv_cpu_exec_interrupt(CPUState *cs, int interrupt_request);
+void andes_riscv_cpu_do_interrupt(CPUState *cs);
 
 #endif /* ANDES_RISCV_CPU_H */
