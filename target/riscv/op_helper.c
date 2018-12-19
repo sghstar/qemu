@@ -638,6 +638,16 @@ static void validate_csr(CPURISCVState *env, uint64_t which,
     unsigned csr_priv = get_field((which), 0x300);
     unsigned csr_read_only = get_field((which), 0xC00) == 3;
     if (((write) && csr_read_only) || (env->priv < csr_priv)) {
+        /* CSR extension interface hook
+         * TODO: use CSR I/F instead
+         */
+        if (env->csrif.csr_validate_helper != riscv_csr_validate_helper) {
+            int next = 0;
+            env->csrif.csr_validate_helper(env, which, write, ra, &next);
+            if (!next) {
+                return;
+            }
+        }
         do_raise_exception_err(env, RISCV_EXCP_ILLEGAL_INST, ra);
     }
 #endif
@@ -744,6 +754,15 @@ void helper_tlb_flush(CPURISCVState *env)
 
 #endif /* !CONFIG_USER_ONLY */
 
+void riscv_csr_validate_helper(CPURISCVState *env, uint64_t which,
+                                     uint64_t write, uintptr_t ra, int *next)
+{
+    if (next) {
+        *next = 0; /* done */
+    }
+    return validate_csr(env, which, write, ra);
+}
+
 target_ulong riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next)
 {
     if (next) {
@@ -762,6 +781,7 @@ void riscv_csr_write_helper(CPURISCVState *env, target_ulong value, target_ulong
 
 void riscv_csrif_init(CPURISCVState *env)
 {
+    env->csrif.csr_validate_helper = riscv_csr_validate_helper;
     env->csrif.csr_read_helper = riscv_csr_read_helper;
     env->csrif.csr_write_helper = riscv_csr_write_helper;
 }

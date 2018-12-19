@@ -301,6 +301,8 @@ void csr_write_helper(CPURISCVState *env, target_ulong val_to_write,
         target_ulong csrno);
 target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno);
 
+void riscv_csr_validate_helper(CPURISCVState *env, uint64_t which,
+                                     uint64_t write, uintptr_t ra, int *next);
 void riscv_csr_write_helper(CPURISCVState *env, target_ulong val_to_write, target_ulong csrno, int *next);
 target_ulong riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next);
 

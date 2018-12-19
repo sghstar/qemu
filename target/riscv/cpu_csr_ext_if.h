@@ -19,9 +19,8 @@
 #ifndef RISCV_CPU_CSR_EXT_IF_H
 #define RISCV_CPU_CSR_EXT_IF_H
 
-typedef struct CPURVCsrExtIf CPURVCsrExtIf;
-
-struct CPURVCsrExtIf {
+typedef struct CPURVCsrExtIf {
+    void (*csr_validate_helper)(CPURISCVState *env, uint64_t which, uint64_t write, uintptr_t ra, int *next);
     target_ulong (*csr_read_helper)(CPURISCVState *env, target_ulong csrno, int *next);
     void (*csr_write_helper)(CPURISCVState *env, target_ulong value, target_ulong csrno, int *next);
 };
