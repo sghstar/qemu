@@ -101,7 +101,7 @@ update_eip_vectored(void *plic)
                     /* claim here */
                     hwaddr addr = ss->context_base + ss->context_stride * addrid + 4;
                     irq_id = andes_plic_read(plic, addr, 4);
-                    ext->vectored_irq_m = irq_id;
+                    ext->vectored_irq_s = irq_id;
                     assert(irq_id);
                 }
             }
