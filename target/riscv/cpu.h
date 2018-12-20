@@ -304,6 +304,10 @@ target_ulong csr_read_helper(CPURISCVState *env, target_ulong csrno);
 void riscv_csr_write_helper(CPURISCVState *env, target_ulong val_to_write, target_ulong csrno, int *next);
 target_ulong riscv_csr_read_helper(CPURISCVState *env, target_ulong csrno, int *next);
 
+#ifndef CONFIG_USER_ONLY
+void riscv_set_local_interrupt(RISCVCPU *cpu, target_ulong mask, int value);
+#endif
+
 #include "exec/cpu-all.h"
 
 #endif /* RISCV_CPU_H */
