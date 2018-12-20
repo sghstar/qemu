@@ -86,6 +86,10 @@ struct CPURVAndesExt {
 
     /* counter internals */
     uint64_t hpmcounter_mark[32];
+
+    /* vectored interrupt internals */
+    uint32_t vectored_irq_m;
+    uint32_t vectored_irq_s;
 };
 
 void andes_riscv_isaif_init(CPURISCVState *env);
