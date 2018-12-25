@@ -416,7 +416,10 @@ static void andes_gen_dsp_R64R64RR_internal(DisasContext *ctx, void (*f)(TCGv_i6
 {
 
     uint32_t rd, rs1, rs2;
-    TCGv v0, v1, v2;
+    TCGv v0, v1;
+#if defined(TARGET_RISCV64)
+    TCGv v2;
+#endif
 #if defined(TARGET_RISCV32)
     TCGv_i64 v64_1;
 #endif
@@ -559,7 +562,6 @@ static int gen_wext(DisasContext *ctx)
     rd = ANDES_DSP_RD(ctx->opcode);
     rs1 = ANDES_DSP_RS1(ctx->opcode);
     rs2 = ANDES_DSP_RS2(ctx->opcode);
-    target_ulong imm = extract32(ctx->opcode, 20, 5);
 #if defined(TARGET_RISCV32)
     v64_1 = tcg_temp_new_i64();
     v0 = tcg_temp_new();
@@ -676,10 +678,6 @@ static int gen_bpick(DisasContext *ctx)
   tcg_temp_free(v1);
   tcg_temp_free(v2);
   return 0;
-}
-static int gen_umsr64(DisasContext *ctx)
-{
-
 }
 static int gen_bitrevi(DisasContext *ctx)
 {

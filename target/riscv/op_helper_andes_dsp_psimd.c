@@ -335,14 +335,6 @@ target_ulong psimd_rrrr(uint32_t op, target_ulong rd, target_ulong rs1, target_u
 #else
     int32_t vec32_num = 1;
 #endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec16_num = 2;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec8_num = 4;
-#endif
     int32_t *ptr32, *ptr_a32, *ptr_b32, *ptr_d32;
     ptr32 = (int32_t *) & result.b32;
     ptr_a32 = (int32_t *) & rs1;
@@ -811,18 +803,6 @@ target_ulong psimd_rr(uint32_t op, target_ulong rs1) {
     reg_t result;
     reg_t reg_rs1;
     reg_rs1.u = rs1;
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec32_num = 1;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec16_num = 2;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec8_num = 4;
-#endif
     int32_t *ptr32, *ptr_a32;
     ptr32 = (int32_t *) & result.b32;
     ptr_a32 = (int32_t *) & rs1;
@@ -889,14 +869,6 @@ target_ulong psimd_rr_uimm(uint32_t op, target_ulong rs1, target_ulong uimm) {
     int32_t vec32_num = 2;
 #else
     int32_t vec32_num = 1;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec16_num = 2;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec8_num = 4;
 #endif
     int32_t *ptr32, *ptr_a32;
     ptr32 = (int32_t *) & result.b32;
@@ -1250,15 +1222,14 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
     reg_rs1.u = rs1;
     reg_t reg_rs2;
     reg_rs2.u = rs2;
-    int32_t res, i;
+    int32_t i;
+#if defined(TARGET_RISCV64)
+    int32_t res;
+#endif
 #if defined(TARGET_RISCV64)
     int32_t vec32_num = 2;
 #else
     int32_t vec32_num = 1;
-#endif
-#if defined(TARGET_RISCV64)
-#else
-    int32_t vec16_num = 2;
 #endif
     int32_t *ptr32, *ptr_a32, *ptr_b32;
     ptr32 = (int32_t *) & result.b32;
