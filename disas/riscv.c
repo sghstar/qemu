@@ -1394,7 +1394,6 @@ static void decode_dsp_opcode(rv_decode *dec, rv_isa isa)
 {
     rv_inst inst = dec->inst;
     rv_opcode op = rv_op_illegal;
-    int bit24 = inst & 0x01000000;
     switch (inst >> 25) {
 /*
       case radd16:

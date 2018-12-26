@@ -602,7 +602,9 @@ static int gen_wexti(DisasContext *ctx)
     rd = ANDES_DSP_RD(ctx->opcode);
     rs1 = ANDES_DSP_RS1(ctx->opcode);
     rs2 = ANDES_DSP_RS2(ctx->opcode);
+#if defined(TARGET_RISCV32)
     target_ulong imm = extract32(ctx->opcode, 20, 5);
+#endif
 #if defined(TARGET_RISCV32)
     v64_1 = tcg_temp_new_i64();
     v0 = tcg_temp_new();
