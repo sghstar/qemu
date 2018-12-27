@@ -562,7 +562,7 @@ update_pmnds_interrupt(CPURISCVState *env)
     target_ulong irq = ext->mcounterovf & ext->mcounterinten;
     target_ulong irq_m = irq & ~ext->mcountermask_m;
     target_ulong irq_s = irq & ext->mcountermask_m;
-    riscv_set_local_interrupt(cpu, MIP_PMOVI, !!irq_m);
+    riscv_cpu_update_mip(cpu, MIP_PMOVI, BOOL_TO_MASK(!!irq_m));
     riscv_set_local_interrupt_smode(cpu, MIP_PMOVI, !!irq_s);
 #endif
 }
