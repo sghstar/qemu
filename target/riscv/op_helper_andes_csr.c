@@ -763,9 +763,6 @@ write_other_csr(CPURISCVState *env, target_ulong value, target_ulong csrno)
     int cont = NO;
     CPURVAndesExt *ext = env->ext;
 
-    if (next) {
-        *next = OK; /* presume */
-    }
 #ifndef CONFIG_USER_ONLY
     uint64_t delegable_ints = MIP_SSIP | MIP_STIP | MIP_SEIP;
     uint64_t all_ints = delegable_ints | MIP_MSIP | MIP_MTIP | MIP_MEIP | MIP_PMOVI;
