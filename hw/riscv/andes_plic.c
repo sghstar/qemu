@@ -73,7 +73,7 @@ update_eip_vectored(void *plic)
         switch (mode) {
         case PLICMode_M:
             if (!ext->vectored_irq_m) {
-                level = sifive_plic_num_irqs_pending(plic, addrid) > 0;
+                level = sifive_plic_irqs_pending(plic, addrid);
                 if (level) {
                     /* claim here */
                     hwaddr addr = ss->context_base + ss->context_stride * addrid + 4;
@@ -83,12 +83,12 @@ update_eip_vectored(void *plic)
                 }
             }
             yLOG("%s: M level %d, irq_id %d\n", __func__, level, irq_id);
-            riscv_set_local_interrupt(RISCV_CPU(cpu), ss->m_mode_mip_mask,
-                                      level);
+            riscv_cpu_update_mip(RISCV_CPU(cpu), ss->m_mode_mip_mask,
+                                      BOOL_TO_MASK(level));
             break;
         case PLICMode_S:
             if (!ext->vectored_irq_s) {
-                level = sifive_plic_num_irqs_pending(plic, addrid) > 0;
+                level = sifive_plic_irqs_pending(plic, addrid);
                 if (level) {
                     /* claim here */
                     hwaddr addr = ss->context_base + ss->context_stride * addrid + 4;
@@ -98,8 +98,8 @@ update_eip_vectored(void *plic)
                 }
             }
             yLOG("%s: S level %d, irq_id %d\n", __func__, level, irq_id);
-            riscv_set_local_interrupt(RISCV_CPU(cpu), ss->s_mode_mip_mask,
-                                      level);
+            riscv_cpu_update_mip(RISCV_CPU(cpu), ss->s_mode_mip_mask,
+                                      BOOL_TO_MASK(level));
             break;
         default:
             break;
