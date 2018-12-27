@@ -669,11 +669,11 @@ static inline void
 update_pmnds_event(CPURISCVState *env, target_ulong value, target_ulong csrno)
 {
 #ifndef CONFIG_USER_ONLY
-    int eventidx = csrno - CSR_MHPMEVENT0;
-    // printf("%s: eventidx %d = 0x%08lx\n", __func__, eventidx, (long)value);
+    int hpmidx = csrno - CSR_MHPMEVENT0;
+    // printf("%s: hpmidx %d = 0x%08lx\n", __func__, hpmidx, (long)value);
     CPURVAndesExt* ext = env->ext;
-    target_ulong previous = ext->mhpmevent[eventidx];
-    ext->mhpmevent[eventidx] = value;
+    target_ulong previous = ext->mhpmevent[hpmidx];
+    ext->mhpmevent[hpmidx] = value;
     int inc = 0;
     /* the simulation is simpplified as following:
      *   # the count will update on next 'tick' ignoring the imprecise
@@ -694,7 +694,7 @@ update_pmnds_event(CPURISCVState *env, target_ulong value, target_ulong csrno)
     assert(activated_event_count >= 0 && "activated_event_count >= 0");
     if (inc == 1) {
         uint64_t klock = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
-        ext->hpmcounter_mark[csrno] = klock;
+        ext->hpmcounter_mark[hpmidx] = klock;
         if (activated_event_count == 1) {
             uint64_t next = klock + NANOSECONDS_PER_SECOND / 10; /* 10Hz */
             timer_mod(pmnds_timer, next);
