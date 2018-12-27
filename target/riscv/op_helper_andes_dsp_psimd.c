@@ -1166,7 +1166,7 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2);
 target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
 
 
-    reg_t result;
+    reg_t result = {0};
     reg_t reg_rs1;
     reg_rs1.u = rs1;
     reg_t reg_rs2;
