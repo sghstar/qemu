@@ -70,7 +70,7 @@ static void andes_plmt_timer_cb(void* opaque)
 static uint64_t andes_plmt_read(void* opaque, hwaddr addr, unsigned size)
 {
     AndesPLMTState* plmt = opaque;
-    uint64_t rz;
+    uint64_t rz = 0;
     switch (addr) {
     case 0: /* mtime */
         rz = cpu_riscv_read_rtc() & 0xFFFFFFFFu;
@@ -92,12 +92,10 @@ static uint64_t andes_plmt_read(void* opaque, hwaddr addr, unsigned size)
             rz = (env->timecmp >> 32) & 0xFFFFFFFFu;
         } else {
             error_report("plmt: invalid read: %08x", (uint32_t)addr);
-            return 0;
         }
         break;
     }
     default:
-        rz = 0;
         error_report("plmt: invalid read: %08x", (uint32_t)addr);
     }
 
