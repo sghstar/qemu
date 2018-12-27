@@ -92,7 +92,6 @@ target_ulong helper_andes_dsp_add8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] + rs2_p[i];
   return rd;
 }
-target_ulong helper_andes_dsp_radd8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_radd8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -105,7 +104,6 @@ target_ulong helper_andes_dsp_radd8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] + rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_rsub8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rsub8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -118,7 +116,6 @@ target_ulong helper_andes_dsp_rsub8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] - rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_ursub8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ursub8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -131,7 +128,6 @@ target_ulong helper_andes_dsp_ursub8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] - rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_uradd8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_uradd8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -281,7 +277,6 @@ target_ulong helper_andes_dsp_srli8_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_srli16_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srli16_u(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -321,7 +316,6 @@ target_ulong helper_andes_dsp_srai8_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_srai16_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srai16_u(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -341,7 +335,6 @@ target_ulong helper_andes_dsp_srai16_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_srli8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srli8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -354,7 +347,6 @@ target_ulong helper_andes_dsp_srli8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srli16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srli16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -367,7 +359,6 @@ target_ulong helper_andes_dsp_srli16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srai8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srai8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -380,7 +371,6 @@ target_ulong helper_andes_dsp_srai8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srai16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srai16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -393,7 +383,6 @@ target_ulong helper_andes_dsp_srai16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srl8_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srl8_u(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -413,7 +402,6 @@ target_ulong helper_andes_dsp_srl8_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_srl16_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srl16_u(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -433,7 +421,6 @@ target_ulong helper_andes_dsp_srl16_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_sra8_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sra8_u(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -453,7 +440,6 @@ target_ulong helper_andes_dsp_sra8_u(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_sra16_u(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sra16_u(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -583,7 +569,6 @@ target_ulong helper_andes_dsp_ksll8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_scmple16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_scmple16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -597,7 +582,6 @@ target_ulong helper_andes_dsp_scmple16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_ucmple16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ucmple16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -611,7 +595,6 @@ target_ulong helper_andes_dsp_ucmple16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_ucmplt16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ucmplt16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -625,7 +608,6 @@ target_ulong helper_andes_dsp_ucmplt16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_ucmplt8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ucmplt8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -639,7 +621,6 @@ target_ulong helper_andes_dsp_ucmplt8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_ucmple8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ucmple8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -653,7 +634,6 @@ target_ulong helper_andes_dsp_ucmple8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_scmple8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_scmple8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -667,7 +647,6 @@ target_ulong helper_andes_dsp_scmple8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_scmplt8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_scmplt8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -681,7 +660,6 @@ target_ulong helper_andes_dsp_scmplt8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_scmplt16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_scmplt16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -695,7 +673,6 @@ target_ulong helper_andes_dsp_scmplt16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_cmpeq8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_cmpeq8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -709,7 +686,6 @@ target_ulong helper_andes_dsp_cmpeq8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_umin8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_umin8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -723,7 +699,6 @@ target_ulong helper_andes_dsp_umin8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_umax8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_umax8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -737,7 +712,6 @@ target_ulong helper_andes_dsp_umax8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_smin8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_smin8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -751,7 +725,6 @@ target_ulong helper_andes_dsp_smin8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_smax8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_smax8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -765,7 +738,6 @@ target_ulong helper_andes_dsp_smax8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_smax16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_smax16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -779,7 +751,6 @@ target_ulong helper_andes_dsp_smax16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_uclip8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_uclip8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -794,7 +765,6 @@ target_ulong helper_andes_dsp_uclip8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_uclip16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_uclip16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -809,7 +779,6 @@ target_ulong helper_andes_dsp_uclip16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_sclip8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sclip8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -824,7 +793,6 @@ target_ulong helper_andes_dsp_sclip8(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_sclip16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sclip16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -839,7 +807,6 @@ target_ulong helper_andes_dsp_sclip16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_smin16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_smin16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -853,7 +820,6 @@ target_ulong helper_andes_dsp_smin16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_umax16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_umax16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -867,7 +833,6 @@ target_ulong helper_andes_dsp_umax16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_umin16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_umin16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -881,7 +846,6 @@ target_ulong helper_andes_dsp_umin16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_cmpeq16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_cmpeq16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -912,7 +876,6 @@ target_ulong helper_andes_dsp_ksll16(target_ulong rs1, target_ulong rs2)
   }
   return rd;
 }
-target_ulong helper_andes_dsp_slli8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_slli8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -927,7 +890,6 @@ target_ulong helper_andes_dsp_slli8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] << (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_slli16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_slli16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -942,7 +904,6 @@ target_ulong helper_andes_dsp_slli16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] << (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_sll8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sll8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -957,7 +918,6 @@ target_ulong helper_andes_dsp_sll8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] << (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_sll16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sll16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -972,7 +932,6 @@ target_ulong helper_andes_dsp_sll16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] << (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srl8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srl8(target_ulong rs1, target_ulong rs2)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -987,7 +946,6 @@ target_ulong helper_andes_dsp_srl8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_srl16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_srl16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1002,7 +960,6 @@ target_ulong helper_andes_dsp_srl16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_sra8(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sra8(target_ulong rs1, target_ulong rs2)
 {
   s8p rs1_p = (s8p)&rs1;
@@ -1017,7 +974,6 @@ target_ulong helper_andes_dsp_sra8(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_sra16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_sra16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -1032,7 +988,6 @@ target_ulong helper_andes_dsp_sra16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] >> (shift_amount);
   return rd;
 }
-target_ulong helper_andes_dsp_add16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_add16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1045,7 +1000,6 @@ target_ulong helper_andes_dsp_add16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = rs1_p[i] + rs2_p[i];
   return rd;
 }
-target_ulong helper_andes_dsp_rsub16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rsub16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -1058,7 +1012,6 @@ target_ulong helper_andes_dsp_rsub16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] - rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_radd16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_radd16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -1071,7 +1024,6 @@ target_ulong helper_andes_dsp_radd16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] + rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_rcrsa16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rcrsa16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -1091,7 +1043,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_rcras16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rcras16(target_ulong rs1, target_ulong rs2)
 {
   s16p rs1_p = (s16p)&rs1;
@@ -1111,7 +1062,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_urcrsa16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_urcrsa16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1132,7 +1082,6 @@ const uint32_t LC= 3;
   return rd;
 }
 
-target_ulong helper_andes_dsp_urcras16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_urcras16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1152,7 +1101,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_ursub16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_ursub16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1165,7 +1113,6 @@ target_ulong helper_andes_dsp_ursub16(target_ulong rs1, target_ulong rs2)
       rd_p[i] = (rs1_p[i] - rs2_p[i]) >> 1;
   return rd;
 }
-target_ulong helper_andes_dsp_uradd16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_uradd16(target_ulong rs1, target_ulong rs2)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1512,7 +1459,6 @@ u16 clrs(u16 v, int n) {
     }
     return count;
 }
-target_ulong helper_andes_dsp_clz8(target_ulong rs1);
 target_ulong helper_andes_dsp_clz8(target_ulong rs1)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -1525,7 +1471,6 @@ target_ulong helper_andes_dsp_clz8(target_ulong rs1)
 
   return rd;
 }
-target_ulong helper_andes_dsp_clz16(target_ulong rs1);
 target_ulong helper_andes_dsp_clz16(target_ulong rs1)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1564,7 +1509,6 @@ target_ulong helper_andes_dsp_clo16(target_ulong rs1)
 
   return rd;
 }
-target_ulong helper_andes_dsp_clrs16(target_ulong rs1);
 target_ulong helper_andes_dsp_clrs16(target_ulong rs1)
 {
   u16p rs1_p = (u16p)&rs1;
@@ -1577,7 +1521,6 @@ target_ulong helper_andes_dsp_clrs16(target_ulong rs1)
 
   return rd;
 }
-target_ulong helper_andes_dsp_clrs8(target_ulong rs1);
 target_ulong helper_andes_dsp_clrs8(target_ulong rs1)
 {
   u8p rs1_p = (u8p)&rs1;
@@ -1628,14 +1571,12 @@ target_ulong helper_andes_dsp_kabs8(target_ulong rs1)
 
   return rd;
 }
-target_ulong helper_andes_dsp_maxw(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_maxw(target_ulong rs1, target_ulong rs2)
 {
   s32 ra = rs1;
   s32 rb = rs2;
   return (ra > rb) ? ra : rb;
 }
-target_ulong helper_andes_dsp_minw(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_minw(target_ulong rs1, target_ulong rs2)
 {
   s32 ra = rs1;
@@ -1643,7 +1584,6 @@ target_ulong helper_andes_dsp_minw(target_ulong rs1, target_ulong rs2)
   return (ra < rb) ? ra : rb;
 }
 
-target_ulong helper_andes_dsp_stas16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_stas16(target_ulong rs1, target_ulong rs2)
 {
 
@@ -1664,7 +1604,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_stsa16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_stsa16(target_ulong rs1, target_ulong rs2)
 {
 
@@ -1685,7 +1624,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_rstas16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rstas16(target_ulong rs1, target_ulong rs2)
 {
 
@@ -1706,7 +1644,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_rstsa16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_rstsa16(target_ulong rs1, target_ulong rs2)
 {
 
@@ -1727,7 +1664,6 @@ const uint32_t LC= 3;
   }
   return rd;
 }
-target_ulong helper_andes_dsp_urstas16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_urstas16(target_ulong rs1, target_ulong rs2)
 {
 
@@ -1749,7 +1685,6 @@ const uint32_t LC= 3;
   return rd;
 
 }
-target_ulong helper_andes_dsp_urstsa16(target_ulong rs1, target_ulong rs2);
 target_ulong helper_andes_dsp_urstsa16(target_ulong rs1, target_ulong rs2)
 {
 

@@ -340,27 +340,9 @@ target_ulong psimd_rrrr(uint32_t op, target_ulong rd, target_ulong rs1, target_u
     ptr_a32 = (int32_t *) & rs1;
     ptr_b32 = (int32_t *) & rs2;
     ptr_d32 = (int32_t *) & rd;
-    uint32_t *uptr32, *uptr_a32, *uptr_b32, *uptr_d32;
-    uptr32 = (uint32_t *) & result.b32;
-    uptr_a32 = (uint32_t *) & rs1;
-    uptr_b32 = (uint32_t *) & rs2;
-    uptr_d32 = (uint32_t *) & rd;
-    int16_t *ptr16, *ptr_a16, *ptr_b16;
-    ptr16 = (int16_t *) & result.b16;
+    int16_t *ptr_a16, *ptr_b16;
     ptr_a16 = (int16_t *) & rs1;
     ptr_b16 = (int16_t *) & rs2;
-    uint16_t *uptr16, *uptr_a16, *uptr_b16;
-    uptr16 = (uint16_t *) & result.ub16;
-    uptr_a16 = (uint16_t *) & rs1;
-    uptr_b16 = (uint16_t *) & rs2;
-    int8_t *ptr8, *ptr_a8, *ptr_b8;
-    ptr8 = (int8_t *) & result.b8;
-    ptr_a8 = (int8_t *) & rs1;
-    ptr_b8 = (int8_t *) & rs2;
-    uint8_t *uptr8, *uptr_a8, *uptr_b8;
-    uptr8 = (uint8_t *) & result.ub8;
-    uptr_a8 = (uint8_t *) & rs1;
-    uptr_b8 = (uint8_t *) & rs2;
     switch (op) {
       case kdmatt: {
 
@@ -801,26 +783,8 @@ target_ulong psimd_rr(uint32_t op, target_ulong rs1) {
 
 
     reg_t result;
-    reg_t reg_rs1;
-    reg_rs1.u = rs1;
-    int32_t *ptr32, *ptr_a32;
-    ptr32 = (int32_t *) & result.b32;
-    ptr_a32 = (int32_t *) & rs1;
-    uint32_t *uptr32, *uptr_a32;
-    uptr32 = (uint32_t *) & result.b32;
+    uint32_t *uptr_a32;
     uptr_a32 = (uint32_t *) & rs1;
-    int16_t *ptr16, *ptr_a16;
-    ptr16 = (int16_t *) & result.b16;
-    ptr_a16 = (int16_t *) & rs1;
-    uint16_t *uptr16, *uptr_a16;
-    uptr16 = (uint16_t *) & result.ub16;
-    uptr_a16 = (uint16_t *) & rs1;
-    int8_t *ptr8, *ptr_a8;
-    ptr8 = (int8_t *) & result.b8;
-    ptr_a8 = (int8_t *) & rs1;
-    uint8_t *uptr8, *uptr_a8;
-    uptr8 = (uint8_t *) & result.ub8;
-    uptr_a8 = (uint8_t *) & rs1;
     switch (op) {
       case clrs32: {
 #if defined(TARGET_RISCV32)
@@ -876,17 +840,6 @@ target_ulong psimd_rr_uimm(uint32_t op, target_ulong rs1, target_ulong uimm) {
     uint32_t *uptr32, *uptr_a32;
     uptr32 = (uint32_t *) & result.b32;
     uptr_a32 = (uint32_t *) & rs1;
-    int16_t *ptr16, *ptr_a16;
-    ptr16 = (int16_t *) & result.b16;
-    ptr_a16 = (int16_t *) & rs1;
-    uint16_t *uptr16, *uptr_a16;
-    uptr16 = (uint16_t *) & result.ub16;
-    uptr_a16 = (uint16_t *) & rs1;
-    int8_t *ptr_a8;
-    ptr_a8 = (int8_t *) & rs1;
-    uint8_t *uptr8, *uptr_a8;
-    uptr8 = (uint8_t *) & result.ub8;
-    uptr_a8 = (uint8_t *) & rs1;
 #define imm5u uimm
 #define imm6u uimm
 
@@ -1013,10 +966,6 @@ target_ulong psimd_rr_uimm(uint32_t op, target_ulong rs1, target_ulong uimm) {
 uint64_t psimd_rrr64(uint32_t op, uint64_t rs1, uint64_t rs2);
 uint64_t psimd_rrr64(uint32_t op, uint64_t rs1, uint64_t rs2) {
 
-    reg_t reg_rs1;
-    reg_rs1.u = rs1;
-    reg_t reg_rs2;
-    reg_rs2.u = rs2;
     switch(op) {
       case smal:
 	  {
@@ -1235,26 +1184,17 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
     ptr32 = (int32_t *) & result.b32;
     ptr_a32 = (int32_t *) & rs1;
     ptr_b32 = (int32_t *) & rs2;
+
+
+#if defined(TARGET_RISCV64)
     uint32_t *uptr32, *uptr_a32, *uptr_b32;
     uptr32 = (uint32_t *) & result.b32;
     uptr_a32 = (uint32_t *) & rs1;
     uptr_b32 = (uint32_t *) & rs2;
-    int16_t *ptr16, *ptr_a16, *ptr_b16;
-    ptr16 = (int16_t *) & result.b16;
+#endif
+    int16_t *ptr_a16, *ptr_b16;
     ptr_a16 = (int16_t *) & rs1;
     ptr_b16 = (int16_t *) & rs2;
-    uint16_t *uptr16, *uptr_a16, *uptr_b16;
-    uptr16 = (uint16_t *) & result.ub16;
-    uptr_a16 = (uint16_t *) & rs1;
-    uptr_b16 = (uint16_t *) & rs2;
-    int8_t *ptr8, *ptr_a8, *ptr_b8;
-    ptr8 = (int8_t *) & result.b8;
-    ptr_a8 = (int8_t *) & rs1;
-    ptr_b8 = (int8_t *) & rs2;
-    uint8_t *uptr8, *uptr_a8, *uptr_b8;
-    uptr8 = (uint8_t *) & result.ub8;
-    uptr_a8 = (uint8_t *) & rs1;
-    uptr_b8 = (uint8_t *) & rs2;
     switch (op) {
 
 #if (WITH_TARGET_WORD_BITSIZE == 64)
@@ -2025,6 +1965,7 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
 #endif
 		  }
 		break;
+#if 0
       case kmmwt2_u:
 		  {
 		    int64_t res;
@@ -2051,6 +1992,8 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
 		    result.s = result.s;
 		  }
 		break;
+#endif
+#if 0
       case kmmwt2:
 		  {
 		    int b16_offset = 1;
@@ -2099,13 +2042,15 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
 		    result.s = result.s;
 		  }
 		break;
+#endif
+#if 0
       case kmmwb2:
 		  {
 		    int b16_offset = 0;
 		    for (i = 0; i < vec32_num; i++)
 		      {
 			if ((*(ptr_a32 + i) == 0x80000000)
-			    && ((int32_t)*(ptr_b16 + b16_offset) == 0x8000))
+			    && ((*(ptr_b16 + b16_offset)) == 0x8000))
 			  {
 			    *(ptr32 + i) = 0x7fffffff;
 			    SET_OV();
@@ -2120,6 +2065,7 @@ target_ulong psimd_rrr(uint32_t op, target_ulong rs1, target_ulong rs2) {
 		    result.s = result.s;
 		  }
 		break;
+#endif
       case smmwt_u:
 		  {
 		    int64_t res;

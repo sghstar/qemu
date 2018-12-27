@@ -594,14 +594,19 @@ static int gen_wext(DisasContext *ctx)
 static int gen_wexti(DisasContext *ctx)
 {
 
-    uint32_t rd, rs1, rs2;
+    uint32_t rd, rs1;
+#if defined(TARGET_RISCV64)
+    uint32_t rs2;
+#endif
     TCGv v0, v1, v2;
 #if defined(TARGET_RISCV32)
     TCGv_i64 v64_1;
 #endif
     rd = ANDES_DSP_RD(ctx->opcode);
     rs1 = ANDES_DSP_RS1(ctx->opcode);
+#if defined(TARGET_RISCV64)
     rs2 = ANDES_DSP_RS2(ctx->opcode);
+#endif
 #if defined(TARGET_RISCV32)
     target_ulong imm = extract32(ctx->opcode, 20, 5);
 #endif
