@@ -44,15 +44,16 @@ static void andes_plmt_write_timecmp(RISCVCPU* cpu, uint64_t value)
     if (cpu->env.timecmp <= rtc_r) {
         /* if we're setting an MTIMECMP value in the "past",
            immediately raise the timer interrupt */
-        riscv_set_local_interrupt(cpu, MIP_MTIP, 1);
+        riscv_cpu_update_mip(cpu, MIP_MTIP, BOOL_TO_MASK(1));
         return;
     }
 
     /* otherwise, set up the future timer interrupt */
-    riscv_set_local_interrupt(cpu, MIP_MTIP, 0);
+    riscv_cpu_update_mip(cpu, MIP_MTIP, BOOL_TO_MASK(0));
     diff = cpu->env.timecmp - rtc_r;
     /* back to ns (note args switched in muldiv64) */
-    next = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + muldiv64(diff, NANOSECONDS_PER_SECOND, ANDES_PLMT_TIMEBASE_FREQ);
+    next = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 
+        muldiv64(diff, NANOSECONDS_PER_SECOND, ANDES_PLMT_TIMEBASE_FREQ);
     timer_mod(cpu->env.timer, next);
 }
 
@@ -63,7 +64,7 @@ static void andes_plmt_write_timecmp(RISCVCPU* cpu, uint64_t value)
 static void andes_plmt_timer_cb(void* opaque)
 {
     RISCVCPU* cpu = opaque;
-    riscv_set_local_interrupt(cpu, MIP_MTIP, 1);
+    riscv_cpu_update_mip(cpu, MIP_MTIP, BOOL_TO_MASK(1));
 }
 
 static uint64_t andes_plmt_read(void* opaque, hwaddr addr, unsigned size)
