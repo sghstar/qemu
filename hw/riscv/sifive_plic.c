@@ -104,7 +104,7 @@ static void sifive_plic_set_claimed(SiFivePLICState *plic, int irq, bool level)
     atomic_set_masked(&plic->claimed[irq >> 5], 1 << (irq & 31), -!!level);
 }
 
-static int sifive_plic_irqs_pending(SiFivePLICState *plic, uint32_t addrid)
+int sifive_plic_irqs_pending(SiFivePLICState *plic, uint32_t addrid)
 {
     int i, j;
     for (i = 0; i < plic->bitfield_words; i++) {
