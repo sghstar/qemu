@@ -243,6 +243,7 @@ static inline bool riscv_feature(CPURISCVState *env, int feature)
 
 #include "cpu_user.h"
 #include "cpu_bits.h"
+#include "cpu_bits_andes_v5.h"
 
 extern const char * const riscv_int_regnames[];
 extern const char * const riscv_fpr_regnames[];
