@@ -94,9 +94,6 @@ struct CPURVAndesExt {
     uint32_t vectored_irq_m;
     uint32_t vectored_irq_s;
 
-    /* counter internals */
-    uint64_t hpmcounter_mark[32];
-
     /* DSP extension internals */
     target_ulong ucode;
     target_ulong loopb;
