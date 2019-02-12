@@ -21,8 +21,6 @@
 
 #define RISCV_DEBUG_INTERRUPT 1
 
-extern int riscv_cpu_hw_interrupts_pending(CPURISCVState *env);
-
 #if RISCV_DEBUG_INTERRUPT
 const char * const andes_riscv_intr_names[] = {
     "M-IMECCI",
@@ -62,7 +60,7 @@ static int andes_riscv_cpu_hw_interrupts_pending(CPURISCVState *env)
     if (enabled_interrupts) {
         return ctz64(enabled_interrupts) + ANDES_SLI_BIAS; /* since non-zero */
     } else {
-        return riscv_cpu_hw_interrupts_pending(env);
+        return riscv_cpu_local_irq_pending(env);
     }
 }
 #endif
@@ -228,7 +226,7 @@ void andes_riscv_cpu_do_interrupt(CPUState *cs)
             if ((code >= 8) && (code < 12)) {
                 assert(irq_id);
                 *cause = irq_id;
-                riscv_set_local_interrupt(cpu, ip_mask, 0);
+                riscv_cpu_update_mip(cpu, ip_mask, BOOL_TO_MASK(0));
             } else {
                 irq_id = 0;
             }
