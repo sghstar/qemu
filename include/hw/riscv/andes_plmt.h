@@ -30,15 +30,19 @@ typedef struct AndesPLMTState {
 
     /*< public >*/
     MemoryRegion mmio;
-    uint32_t target;
+    uint32_t num_harts;
     uint32_t time_base;
     uint32_t timecmp_base;
+    uint32_t aperture_size;
 } AndesPLMTState;
 
 DeviceState *
-andes_plmt_create(hwaddr addr, hwaddr size, uint32_t target);
+andes_plmt_create(hwaddr addr, hwaddr size, uint32_t num_harts,
+    uint32_t time_base, uint32_t timecmp_base);
 
 enum {
+    ANDES_PLMT_TIME_BASE = 0,
+    ANDES_PLMT_TIMECMP_BASE = 8,
     ANDES_PLMT_MMIO_SIZE = 0x100000,
     ANDES_PLMT_TIMEBASE_FREQ = 60 * 1000 * 1000
 };

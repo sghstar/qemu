@@ -71,31 +71,29 @@ static uint64_t andes_plmt_read(void* opaque, hwaddr addr, unsigned size)
 {
     AndesPLMTState* plmt = opaque;
     uint64_t rz = 0;
-    switch (addr) {
-    case 0: /* mtime */
-        rz = cpu_riscv_read_rtc() & 0xFFFFFFFFu;
-        break;
-    case 4: /* mtimeh */
-        rz = (cpu_riscv_read_rtc() >> 32) & 0xFFFFFFFFu;
-        break;
-    case 8: /* mtimecmp */
-    case 12: /* mtimecmph */
-    {
-        size_t hartid = plmt->target;
-        CPUState* cpu = qemu_get_cpu(hartid);
-        CPURISCVState* env = cpu ? cpu->env_ptr : NULL;
+
+    if ((addr >= (plmt->timecmp_base)) &&
+        (addr < (plmt->timecmp_base + (plmt->num_harts << 3)))) {
+        /* %8=0:timecmp_lo, %8=4:timecmp_hi */
+        size_t hartid = (addr - plmt->timecmp_base) >> 3;
+        CPUState *cpu = qemu_get_cpu(hartid);
+        CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
         if (!env) {
             error_report("plmt: invalid timecmp hartid: %zu", hartid);
-        } else if (addr == 8) {
+        } else if ((addr & 0x7) == 0) {
             rz = env->timecmp & 0xFFFFFFFFu;
-        } else if (addr == 12) {
+        } else if ((addr & 0x7) == 4) {
             rz = (env->timecmp >> 32) & 0xFFFFFFFFu;
         } else {
             error_report("plmt: invalid read: %08x", (uint32_t)addr);
         }
-        break;
-    }
-    default:
+    } else if (addr == (plmt->time_base)) {
+        /* time_lo */
+        rz = cpu_riscv_read_rtc() & 0xFFFFFFFFu;
+    } else if (addr == (plmt->time_base + 4)) {
+        /* time_hi */
+        rz = (cpu_riscv_read_rtc() >> 32) & 0xFFFFFFFFu;
+    } else {
         error_report("plmt: invalid read: %08x", (uint32_t)addr);
     }
 
@@ -106,33 +104,30 @@ static void andes_plmt_write(void* opaque, hwaddr addr, uint64_t value, unsigned
 {
     AndesPLMTState* plmt = opaque;
 
-    switch (addr) {
-    case 0: /* mtime */
-        error_report("plmt: mtime write not implemented");
-        break;
-    case 4: /* mtimeh */
-        error_report("plmt: mtimeh write not implemented");
-        break;
-    case 8: /* mtimecmp */
-    case 12: /* mtimecmph */
-    {
-        size_t hartid = plmt->target;
-        CPUState* cpu = qemu_get_cpu(hartid);
-        CPURISCVState* env = cpu ? cpu->env_ptr : NULL;
+    if ((addr >= (plmt->timecmp_base)) &&
+        (addr < (plmt->timecmp_base + (plmt->num_harts << 3)))) {
+        /* %8=0:timecmp_lo, %8=4:timecmp_hi */
+        size_t hartid = (addr - plmt->timecmp_base) >> 3;
+        CPUState *cpu = qemu_get_cpu(hartid);
+        CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
         if (!env) {
             error_report("plmt: invalid timecmp hartid: %zu", hartid);
-        } else if (addr == 8) {
+        } else if ((addr & 0x7) == 0) {
             uint64_t timecmp_hi = env->timecmp >> 32;
             andes_plmt_write_timecmp(RISCV_CPU(cpu), (timecmp_hi << 32) | (value & 0xFFFFFFFFu));
-        } else if (addr == 12) {
+        } else if ((addr & 0x7) == 4) {
             uint64_t timecmp_lo = env->timecmp;
             andes_plmt_write_timecmp(RISCV_CPU(cpu), (value << 32) | (timecmp_lo & 0xFFFFFFFFu));
         } else {
-            error_report("plmt: invalid timecmp write: %08x", (uint32_t)addr);
+            error_report("plmt: invalid write: %08x", (uint32_t)addr);
         }
-        break;
-    }
-    default:
+    } else if (addr == (plmt->time_base)) {
+        /* time_lo */
+        error_report("plmt: time_lo write not implemented");
+    } else if (addr == (plmt->time_base + 4)) {
+        /* time_hi */
+        error_report("plmt: time_hi write not implemented");
+    } else {
         error_report("plmt: invalid write: %08x", (uint32_t)addr);
     }
 }
@@ -143,11 +138,15 @@ static const MemoryRegionOps andes_plmt_ops = {
     .endianness = DEVICE_LITTLE_ENDIAN,
     .valid = {
         .min_access_size = 4,
-        .max_access_size = 4 }
+        .max_access_size = 4
+    }
 };
 
 static Property andes_plmt_properties[] = {
-    DEFINE_PROP_UINT32("target", AndesPLMTState, target, 0),
+    DEFINE_PROP_UINT32("num-harts", AndesPLMTState, num_harts, 0),
+    DEFINE_PROP_UINT32("time-base", AndesPLMTState, time_base, 0),
+    DEFINE_PROP_UINT32("timecmp-base", AndesPLMTState, timecmp_base, 0),
+    DEFINE_PROP_UINT32("aperture-size", AndesPLMTState, aperture_size, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -155,7 +154,7 @@ static void andes_plmt_realize(DeviceState* dev, Error** errp)
 {
     AndesPLMTState* s = ANDES_PLMT(dev);
     memory_region_init_io(&s->mmio, OBJECT(dev), &andes_plmt_ops, s,
-        TYPE_ANDES_PLMT, ANDES_PLMT_MMIO_SIZE);
+        TYPE_ANDES_PLMT, s->aperture_size);
     sysbus_init_mmio(SYS_BUS_DEVICE(dev), &s->mmio);
 }
 
@@ -183,17 +182,26 @@ type_init(andes_plmt_register_types)
 /*
  * Create PLMT device.
  */
-DeviceState* andes_plmt_create(hwaddr addr, hwaddr size, uint32_t target)
+DeviceState* andes_plmt_create(hwaddr addr, hwaddr size, uint32_t num_harts,
+    uint32_t time_base, uint32_t timecmp_base)
 {
-    CPUState* cpu = qemu_get_cpu(target);
-    CPURISCVState* env = cpu ? cpu->env_ptr : NULL;
-    if (env) {
-        env->timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, &andes_plmt_timer_cb, cpu);
+    int i;
+    for (i = 0; i < num_harts; i++) {
+        CPUState *cpu = qemu_get_cpu(i);
+        CPURISCVState *env = cpu ? cpu->env_ptr : NULL;
+        if (!env) {
+            continue;
+        }
+        env->timer = timer_new_ns(QEMU_CLOCK_VIRTUAL,
+                                  &andes_plmt_timer_cb, cpu);
         env->timecmp = 0;
     }
 
-    DeviceState* dev = qdev_create(NULL, TYPE_ANDES_PLMT);
-    qdev_prop_set_uint32(dev, "target", target);
+    DeviceState *dev = qdev_create(NULL, TYPE_ANDES_PLMT);
+    qdev_prop_set_uint32(dev, "num-harts", num_harts);
+    qdev_prop_set_uint32(dev, "time-base", time_base);
+    qdev_prop_set_uint32(dev, "timecmp-base", timecmp_base);
+    qdev_prop_set_uint32(dev, "aperture-size", size);
     qdev_init_nofail(dev);
     sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, addr);
     return dev;
