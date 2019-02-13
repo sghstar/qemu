@@ -54,37 +54,37 @@ static const struct MemmapEntry {
     hwaddr base;
     hwaddr size;
 } andes_ae250_memmap[] = {
-    [ANDES_AE250_DRAM]    = { 0x00000000, 0x80000000 },
-    [ANDES_AE250_SPI]     = { 0x80000000, 0x00100000 },
-    [ANDES_AE250_ILM]     = { 0xa0000000, 0x00200000 },
-    [ANDES_AE250_DLM]     = { 0xa0200000, 0x00200000 },
-    [ANDES_AE250_BMC]     = { 0xe0000000, 0x00100000 },
-    [ANDES_AE250_MAC]     = { 0xe0100000, 0x00100000 },
-    [ANDES_AE250_DMAC]    = { 0xe0e00000, 0x00100000 },
-    [ANDES_AE250_PLIC]    = { 0xe4000000, 0x02000000 },
-    [ANDES_AE250_PLMT]    = { 0xe6000000, 0x00100000 },
-    [ANDES_AE250_SWINT]   = { 0xe6400000, 0x00400000 },
-    [ANDES_AE250_PLDM]    = { 0xe6800000, 0x00100000 },
-    [ANDES_AE250_APBBRG]  = { 0xf0000000, 0x00100000 },
-    [ANDES_AE250_SUM]     = { 0xf0100000, 0x00100000 },
-    [ANDES_AE250_UART1]   = { 0xf0200000, 0x00100000 },
-    [ANDES_AE250_UART2]   = { 0xf0300000, 0x00100000 },
-    [ANDES_AE250_PIT]     = { 0xf0400000, 0x00100000 },
-    [ANDES_AE250_WDT]     = { 0xf0500000, 0x00100000 },
-    [ANDES_AE250_RTC]     = { 0xf0600000, 0x00100000 },
-    [ANDES_AE250_GPIO]    = { 0xf0700000, 0x00100000 },
-    [ANDES_AE250_I2C]     = { 0xf0a00000, 0x00100000 },
-    [ANDES_AE250_SPI1]    = { 0xf0b00000, 0x00100000 },
-    [ANDES_AE250_SDC]     = { 0xf0e00000, 0x00100000 },
-    [ANDES_AE250_SPI2]    = { 0xf0f00000, 0x00100000 },
-    [ANDES_AE250_PIT2]    = { 0xf1000000, 0x00100000 },
-    [ANDES_AE250_PIT3]    = { 0xf1100000, 0x00100000 },
-    [ANDES_AE250_PIT4]    = { 0xf1200000, 0x00100000 },
-    [ANDES_AE250_PIT5]    = { 0xf1300000, 0x00100000 },
-    [ANDES_AE250_SPI3]    = { 0xf1900000, 0x00100000 },
-    [ANDES_AE250_SPI4]    = { 0xf1a00000, 0x00100000 },
-    [ANDES_AE250_I2C2]    = { 0xf1b00000, 0x00100000 },
-    [ANDES_AE250_DEBUG]   = { 0xffff0000, 0x00000100 },
+    [ANDES_AE250_DRAM]      = { 0x00000000u, 0x80000000u },
+    [ANDES_AE250_SPI]       = { 0x80000000u, 0x00100000u },
+    [ANDES_AE250_ILM]       = { 0xa0000000u, 0x00200000u },
+    [ANDES_AE250_DLM]       = { 0xa0200000u, 0x00200000u },
+    [ANDES_AE250_BMC]       = { 0xe0000000u, 0x00100000u },
+    [ANDES_AE250_MAC]       = { 0xe0100000u, 0x00100000u },
+    [ANDES_AE250_DMAC]      = { 0xe0e00000u, 0x00100000u },
+    [ANDES_AE250_PLIC]      = { 0xe4000000u, 0x02000000u },
+    [ANDES_AE250_PLMT]      = { 0xe6000000u, 0x00100000u },
+    [ANDES_AE250_SWINT]     = { 0xe6400000u, 0x00400000u },
+    [ANDES_AE250_PLDM]      = { 0xe6800000u, 0x00100000u },
+    [ANDES_AE250_APBBRG]    = { 0xf0000000u, 0x00100000u },
+    [ANDES_AE250_SUM]       = { 0xf0100000u, 0x00100000u },
+    [ANDES_AE250_UART1]     = { 0xf0200000u, 0x00100000u },
+    [ANDES_AE250_UART2]     = { 0xf0300000u, 0x00100000u },
+    [ANDES_AE250_PIT]       = { 0xf0400000u, 0x00100000u },
+    [ANDES_AE250_WDT]       = { 0xf0500000u, 0x00100000u },
+    [ANDES_AE250_RTC]       = { 0xf0600000u, 0x00100000u },
+    [ANDES_AE250_GPIO]      = { 0xf0700000u, 0x00100000u },
+    [ANDES_AE250_I2C]       = { 0xf0a00000u, 0x00100000u },
+    [ANDES_AE250_SPI1]      = { 0xf0b00000u, 0x00100000u },
+    [ANDES_AE250_SDC]       = { 0xf0e00000u, 0x00100000u },
+    [ANDES_AE250_SPI2]      = { 0xf0f00000u, 0x00100000u },
+    [ANDES_AE250_PIT2]      = { 0xf1000000u, 0x00100000u },
+    [ANDES_AE250_PIT3]      = { 0xf1100000u, 0x00100000u },
+    [ANDES_AE250_PIT4]      = { 0xf1200000u, 0x00100000u },
+    [ANDES_AE250_PIT5]      = { 0xf1300000u, 0x00100000u },
+    [ANDES_AE250_SPI3]      = { 0xf1900000u, 0x00100000u },
+    [ANDES_AE250_SPI4]      = { 0xf1a00000u, 0x00100000u },
+    [ANDES_AE250_I2C2]      = { 0xf1b00000u, 0x00100000u },
+    [ANDES_AE250_DEBUG]     = { 0xffff0000u, 0x00000100u },
 };
 
 typedef struct ResetData {
@@ -183,7 +183,6 @@ static void riscv_andes_ae250_soc_init(Object *obj)
 static void riscv_andes_ae250_soc_realize(DeviceState *dev, Error **errp)
 {
     const struct MemmapEntry *memmap = andes_ae250_memmap;
-    int i;
 
     AndesAe250SocState *s = ANDES_AE250_SOC(dev);
     MemoryRegion *sys_mem = get_system_memory();
@@ -200,11 +199,8 @@ static void riscv_andes_ae250_soc_realize(DeviceState *dev, Error **errp)
         ANDES_AE250_PLIC_CONTEXT_BASE, ANDES_AE250_PLIC_CONTEXT_STRIDE,
         memmap[ANDES_AE250_PLIC].size);
 
-    for (i = 0; i < smp_cpus; ++i) {
-        andes_plmt_create(memmap[ANDES_AE250_PLMT].base + memmap[ANDES_AE250_PLMT].size * i,
-            memmap[ANDES_AE250_PLMT].size, i);
-    }
-
+    andes_plmt_create(memmap[ANDES_AE250_PLMT].base, memmap[ANDES_AE250_PLMT].size,
+                      smp_cpus, ANDES_PLMT_TIME_BASE, ANDES_PLMT_TIMECMP_BASE);
     atcuart100_create(sys_mem, memmap[ANDES_AE250_UART1].base,
                       qdev_get_gpio_in(DEVICE(s->plic), ANDES_AE250_UART1_IRQ),
                       115200, serial_hd(1));
