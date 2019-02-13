@@ -45,19 +45,19 @@ static const struct MemmapEntry {
     hwaddr base;
     hwaddr size;
 } andes_ae350_memmap[] = {
-    [ANDES_AE350_DEBUG] =    {        0x0,      0x100 },
-    [ANDES_AE350_DRAM]       = {0x00000000u, 0x80000000u},
-    [ANDES_AE350_MROM]       = {0xb0000000u, 0x00010000u},
-    [ANDES_AE350_MAC]        = {0xe0100000u, 0x00100000u},
-    [ANDES_AE350_GEM]        = {0xe0200000u, 0x00100000u},
-    [ANDES_AE350_PLIC]       = {0xe4000000u, 0x00400000u},
-    [ANDES_AE350_PLMT]       = {0xe6000000u, 0x00100000u},
-    [ANDES_AE350_SWINT]      = {0xe6400000u, 0x00400000u},
-    [ANDES_AE350_UART1]      = {0xf0200000u, 0x00100000u},
-    [ANDES_AE350_UART2]      = {0xf0300000u, 0x00100000u},
-    [ANDES_AE350_PIT]        = {0xf0400000u, 0x00100000u},
-    [ANDES_AE350_SDC]        = {0xf0e00000u, 0x00100000u},
-    [ANDES_AE350_VIRTIO]     = {0xfe000000u, 0x00001000u},
+    [ANDES_AE350_DEBUG]     = { 0x00000000u, 0x00000100u },
+    [ANDES_AE350_DRAM]      = { 0x00000000u, 0x80000000u },
+    [ANDES_AE350_MROM]      = { 0xb0000000u, 0x00010000u },
+    [ANDES_AE350_MAC]       = { 0xe0100000u, 0x00100000u },
+    [ANDES_AE350_GEM]       = { 0xe0200000u, 0x00100000u },
+    [ANDES_AE350_PLIC]      = { 0xe4000000u, 0x00400000u },
+    [ANDES_AE350_PLMT]      = { 0xe6000000u, 0x00100000u },
+    [ANDES_AE350_SWINT]     = { 0xe6400000u, 0x00400000u },
+    [ANDES_AE350_UART1]     = { 0xf0200000u, 0x00100000u },
+    [ANDES_AE350_UART2]     = { 0xf0300000u, 0x00100000u },
+    [ANDES_AE350_PIT]       = { 0xf0400000u, 0x00100000u },
+    [ANDES_AE350_SDC]       = { 0xf0e00000u, 0x00100000u },
+    [ANDES_AE350_VIRTIO]    = { 0xfe000000u, 0x00001000u },
 };
 
 #define ATFMAC_REVISION     0x10070109
@@ -427,11 +427,8 @@ static void andes_ae350_soc_realize(DeviceState *dev, Error **errp)
         memmap[ANDES_AE350_SWINT].size, MIP_MSIP, MIP_SSIP);
     splicsw = SIFIVE_PLIC(ds);
 
-    for (i = 0; i < smp_cpus; ++i) {
-        andes_plmt_create(memmap[ANDES_AE350_PLMT].base + memmap[ANDES_AE350_PLMT].size * i,
-            memmap[ANDES_AE350_PLMT].size, i);
-    }
-
+    andes_plmt_create(memmap[ANDES_AE350_PLMT].base, memmap[ANDES_AE350_PLMT].size,
+                      smp_cpus, ANDES_PLMT_TIME_BASE, ANDES_PLMT_TIMECMP_BASE);
     atcuart100_create(system_memory, memmap[ANDES_AE350_UART1].base,
                         plic_gpios[ANDES_AE350_UART1_IRQ], 115200,
                         serial_hd(1));
