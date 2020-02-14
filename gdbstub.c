@@ -1113,7 +1113,9 @@ static int gdb_handle_packet(GDBState *s, const char *line_buf)
     case 'g':
         cpu_synchronize_state(s->g_cpu);
         len = 0;
-        for (addr = 0; addr < s->g_cpu->gdb_num_g_regs; addr++) {
+	// Hack: 
+        // for (addr = 0; addr < s->g_cpu->gdb_num_g_regs; addr++) {
+        for (addr = 0; addr < 33; addr++) {
             reg_size = gdb_read_register(s->g_cpu, mem_buf + len, addr);
             len += reg_size;
         }
