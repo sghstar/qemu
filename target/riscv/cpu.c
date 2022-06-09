@@ -581,8 +581,11 @@ static void riscv_cpu_realize(DeviceState *dev, Error **errp)
     }
     assert(env->misa_mxl_max == env->misa_mxl);
 
-    /* If only MISA_EXT is unset for misa, then set it from properties */
-    if (env->misa_ext == 0) {
+    /*
+     * If only MISA_EXT is unset for misa, then set it from properties.
+     * For KVM, misa is told by KVM so properties are ignored.
+     */
+    if (!kvm_enabled() && env->misa_ext == 0) {
         uint32_t ext = 0;
 
         /* Do some ISA extension error checking */
