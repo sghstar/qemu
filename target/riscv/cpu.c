@@ -752,7 +752,7 @@ static void riscv_cpu_realize(DeviceState *dev, Error **errp)
             ext |= RVJ;
         }
 
-        set_misa(env, env->misa_mxl, ext);
+        env->misa_ext_mask = env->misa_ext = ext;
     }
 
     riscv_cpu_register_gdb_regs_for_features(cs);
