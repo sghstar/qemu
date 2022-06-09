@@ -410,7 +410,7 @@ int kvm_arch_init_vcpu(CPUState *cs)
     if (ret) {
         return ret;
     }
-    env->misa_ext = isa;
+    env->misa_ext_mask = env->misa_ext = isa;
 
     return ret;
 }
