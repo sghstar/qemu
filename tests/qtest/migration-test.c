@@ -53,6 +53,17 @@ static bool uffd_feature_thread_id;
  */
 #define DIRTYLIMIT_TOLERANCE_RANGE  25  /* MB/s */
 
+/*
+ * On Windows the QEMU executable is created via CreateProcess() and IO
+ * redirection does not work, so we need to set MigrateStart::hide_stderr
+ * to false to disable adding IO redirection to the command line.
+ */
+#ifndef _WIN32
+# define HIDE_STDERR true
+#else
+# define HIDE_STDERR false
+#endif
+
 #if defined(__linux__)
 #include <sys/syscall.h>
 #include <sys/vfs.h>
@@ -1186,7 +1197,7 @@ static void test_postcopy_recovery_common(MigrateCommon *args)
     g_autofree char *uri = NULL;
 
     /* Always hide errors for postcopy recover tests since they're expected */
-    args->start.hide_stderr = true;
+    args->start.hide_stderr = HIDE_STDERR;
 
     if (migrate_postcopy_prepare(&from, &to, args)) {
         return;
@@ -1287,7 +1298,7 @@ static void test_postcopy_preempt_all(void)
 static void test_baddest(void)
 {
     MigrateStart args = {
-        .hide_stderr = true
+        .hide_stderr = HIDE_STDERR
     };
     QTestState *from, *to;
 
@@ -1412,7 +1423,7 @@ static void test_precopy_unix_tls_x509_default_host(void)
     g_autofree char *uri = g_strdup_printf("unix:%s/migsocket", tmpfs);
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .connect_uri = uri,
         .listen_uri = uri,
@@ -1528,7 +1539,7 @@ static void test_precopy_tcp_tls_psk_mismatch(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "tcp:127.0.0.1:0",
         .start_hook = test_migrate_tls_psk_start_mismatch,
@@ -1566,7 +1577,7 @@ static void test_precopy_tcp_tls_x509_mismatch_host(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "tcp:127.0.0.1:0",
         .start_hook = test_migrate_tls_x509_start_mismatch_host,
@@ -1592,7 +1603,7 @@ static void test_precopy_tcp_tls_x509_hostile_client(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "tcp:127.0.0.1:0",
         .start_hook = test_migrate_tls_x509_start_hostile_client,
@@ -1618,7 +1629,7 @@ static void test_precopy_tcp_tls_x509_reject_anon_client(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "tcp:127.0.0.1:0",
         .start_hook = test_migrate_tls_x509_start_reject_anon_client,
@@ -1749,7 +1760,7 @@ static void test_validate_uuid_error(void)
     MigrateStart args = {
         .opts_source = "-uuid 11111111-1111-1111-1111-111111111111",
         .opts_target = "-uuid 22222222-2222-2222-2222-222222222222",
-        .hide_stderr = true,
+        .hide_stderr = HIDE_STDERR,
     };
 
     do_test_validate_uuid(&args, true);
@@ -1759,7 +1770,7 @@ static void test_validate_uuid_src_not_set(void)
 {
     MigrateStart args = {
         .opts_target = "-uuid 22222222-2222-2222-2222-222222222222",
-        .hide_stderr = true,
+        .hide_stderr = HIDE_STDERR,
     };
 
     do_test_validate_uuid(&args, false);
@@ -1769,7 +1780,7 @@ static void test_validate_uuid_dst_not_set(void)
 {
     MigrateStart args = {
         .opts_source = "-uuid 11111111-1111-1111-1111-111111111111",
-        .hide_stderr = true,
+        .hide_stderr = HIDE_STDERR,
     };
 
     do_test_validate_uuid(&args, false);
@@ -1992,7 +2003,7 @@ static void test_multifd_tcp_tls_psk_mismatch(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "defer",
         .start_hook = test_migrate_multifd_tcp_tls_psk_start_mismatch,
@@ -2040,7 +2051,7 @@ static void test_multifd_tcp_tls_x509_mismatch_host(void)
      */
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "defer",
         .start_hook = test_migrate_multifd_tls_x509_start_mismatch_host,
@@ -2064,7 +2075,7 @@ static void test_multifd_tcp_tls_x509_reject_anon_client(void)
 {
     MigrateCommon args = {
         .start = {
-            .hide_stderr = true,
+            .hide_stderr = HIDE_STDERR,
         },
         .listen_uri = "defer",
         .start_hook = test_migrate_multifd_tls_x509_start_reject_anon_client,
@@ -2090,7 +2101,7 @@ static void test_multifd_tcp_tls_x509_reject_anon_client(void)
 static void test_multifd_tcp_cancel(void)
 {
     MigrateStart args = {
-        .hide_stderr = true,
+        .hide_stderr = HIDE_STDERR,
     };
     QTestState *from, *to, *to2;
     QDict *rsp;
