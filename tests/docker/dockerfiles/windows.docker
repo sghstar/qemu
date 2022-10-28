@@ -1,0 +1,44 @@
+# select as base image matching your host to get process isolation
+FROM mcr.microsoft.com/windows/servercore:1809
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -UseBasicParsing -uri "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe" -OutFile msys2.exe; \
+    .\msys2.exe -y -oC:\; \
+    Remove-Item msys2.exe ; \
+    function msys() { C:\msys64\usr\bin\bash.exe @('-lc') + @Args; } \
+    msys ' '; \
+    msys 'pacman --noconfirm -Syuu'; \
+    msys 'pacman --noconfirm -Syuu'; \
+    msys 'pacman --noconfirm -Scc';
+
+RUN function msys() { C:\msys64\usr\bin\bash.exe @('-lc') + @Args; } \
+    msys 'pacman --noconfirm -Sy --needed \
+          bison diffutils flex \
+          git grep make sed \
+          mingw-w64-x86_64-capstone \
+          mingw-w64-x86_64-curl \
+          mingw-w64-x86_64-cyrus-sasl \
+          mingw-w64-x86_64-gcc \
+          mingw-w64-x86_64-glib2 \
+          mingw-w64-x86_64-gnutls \
+          mingw-w64-x86_64-libnfs \
+          mingw-w64-x86_64-libpng \
+          mingw-w64-x86_64-libssh \
+          mingw-w64-x86_64-libtasn1 \
+          mingw-w64-x86_64-libusb \
+          mingw-w64-x86_64-nettle \
+          mingw-w64-x86_64-ninja \
+          mingw-w64-x86_64-pixman \
+          mingw-w64-x86_64-pkgconf \
+          mingw-w64-x86_64-python \
+          mingw-w64-x86_64-SDL2 \
+          mingw-w64-x86_64-SDL2_image \
+          mingw-w64-x86_64-snappy \
+          mingw-w64-x86_64-usbredir \
+          mingw-w64-x86_64-zstd ';
+
+ENV CHERE_INVOKING 'yes'        # Preserve the current working directory
+ENV MSYSTEM 'MINGW64'           # Start a 64 bit mingw environment
+ENV MSYS 'winsymlinks:native'   # Enable native Windows symlink
